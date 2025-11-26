@@ -1,40 +1,52 @@
 import mongoose from "mongoose";
 import User from "../model/register.model.js";
-import bcrypt, { hash } from "bcrypt";
-const RegisterUser=async (req,res)=>{
+import bcrypt from "bcrypt";
+
+const RegisterUser = async (req, res) => {
   try {
-    const {UserName,Email,Collage,Password}=req.body;
-    if(!UserName || !Email || !Collage || !Password){
+    const { UserName, Email, Collage, Password } = req.body;
+
+    if (!UserName || !Email || !Collage || !Password) {
       return res.status(400).json({
         message: "All fields are required",
-        success: false
+        success: false,
       });
     }
-    const exist=await User.findOne({Email,UserName});
-    if(exist){
+
+    // Check if email or username already exists
+    const exist = await User.findOne({
+      $or: [{ Email }, { UserName }]
+    });
+
+    if (exist) {
       return res.status(400).json({
-        message:"User is already exist",
-        success:false
-      })
+        message: "User already exists",
+        field: exist.Email === Email ? "email" : "username",
+        success: false,
+      });
     }
-    const hashPassword=await bcrypt.hash(Password,10);
-    const newUser=await User.create({
+
+    const hashPassword = await bcrypt.hash(Password, 10);
+
+    await User.create({
       UserName,
       Email,
       Collage,
-      Password:hashPassword,
+      Password: hashPassword,
     });
+
     return res.status(201).json({
-      message:"User register Successfully",
-      success:true
-    })
+      message: "User registered successfully",
+      success: true,
+    });
 
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({
-      message:error.message,
-      success:false
-    })
+      message: error.message,
+      success: false,
+    });
   }
-}
+};
 
-export default RegisterUser
+export default RegisterUser;

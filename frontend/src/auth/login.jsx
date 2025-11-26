@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate  } from "react-router-dom";
 import { useState } from "react";
 import Axios from "axios";
 
@@ -6,6 +6,7 @@ function Login() {
   const [Name, setName] = useState("");
   const [Password, setPassword] = useState("");
   const [Errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const LoginCheck = async () => {
     let newErrors = {};
@@ -27,7 +28,7 @@ function Login() {
         `${import.meta.env.VITE_API}/Login`,
         data
       );
-
+      navigate("/dashboard");
       console.log(response.data);
 
     } catch (error) {

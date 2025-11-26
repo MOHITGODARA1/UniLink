@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate  } from "react-router-dom";
 import { useState } from "react";
 import Axios from "axios";
 
@@ -9,7 +9,7 @@ function SignUp() {
   const [Password, setPassword] = useState("");
   const [ConfirmPassword, setConfirmPassword] = useState("");
   const [Agree, setAgree] = useState(false);
-
+  const navigate = useNavigate();
   const [Errors, setErrors] = useState({});
 
   const registerUser = async (e) => {
@@ -42,7 +42,7 @@ function SignUp() {
       );
 
       console.log(response.data);
-
+      navigate("/dashboard");
       SetUsername("");
       SetEmail("");
       setCollage("");
@@ -51,7 +51,26 @@ function SignUp() {
       setAgree(false);
 
     } catch (error) {
-      console.log(error.message);
+      if (error.response?.data) {
+        const serverError = error.response.data;
+
+        let updatedErrors = {};
+
+        if (serverError.field === "email") {
+          updatedErrors.Email = "Email already exists!";
+        }
+
+        if (serverError.field === "username") {
+          updatedErrors.UserName = "Username is already taken!";
+        }
+
+        // fallback general message
+        if (!serverError.field) {
+          updatedErrors.general = serverError.message || "Something went wrong";
+        }
+
+        setErrors(updatedErrors);
+      }
     }
   };
 
@@ -59,7 +78,6 @@ function SignUp() {
     <>
       <div className="w-full min-h-screen bg-black flex justify-center items-center px-6 overflow-hidden relative">
 
-        {/* BACK BUTTON */}
         <Link
           to="/"
           className="absolute top-6 left-6 text-gray-400 hover:text-white transition flex items-center gap-2"
@@ -68,7 +86,6 @@ function SignUp() {
           <span>Home</span>
         </Link>
 
-        {/* MAIN WRAPPER (40-60 SPLIT) */}
         <div className="
           w-[95%] max-w-5xl 
           bg-white/10 backdrop-blur-xl 
@@ -78,7 +95,7 @@ function SignUp() {
           overflow-hidden
         ">
 
-          {/* LEFT SIDE - 40% */}
+          {/* LEFT SIDE */}
           <div className="flex flex-col justify-center items-center text-center p-10 bg-white/5 border-r border-gray-700">
 
             <img src="./logo.png" alt="logo" className="h-32 mb-6 drop-shadow-xl" />
@@ -93,10 +110,15 @@ function SignUp() {
 
           </div>
 
-          {/* RIGHT SIDE - 60% */}
+          {/* RIGHT SIDE */}
           <div className="flex flex-col justify-center p-10">
 
             <h2 className="text-3xl font-semibold text-white mb-6">Create Account</h2>
+
+            {/* General Error Message */}
+            {Errors.general && (
+              <p className="text-red-500 text-sm mb-3">{Errors.general}</p>
+            )}
 
             {/* USERNAME + EMAIL */}
             <div className="flex flex-col md:flex-row gap-5">
