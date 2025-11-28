@@ -28,6 +28,8 @@ function Login() {
         `${import.meta.env.VITE_API}/Login`,
         data
       );
+      localStorage.setItem("Token",response.data.token)
+      localStorage.setItem("Userdata",response.data.user)
       navigate("/dashboard");
       console.log(response.data);
 

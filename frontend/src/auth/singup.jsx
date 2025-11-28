@@ -36,13 +36,12 @@ function SignUp() {
     try {
       const data = { UserName, Email, Collage, Password };
 
-      const response = await Axios.post(
+      await Axios.post(
         `${import.meta.env.VITE_API}/user-Register`,
         data
       );
-
-      console.log(response.data);
-      navigate("/dashboard");
+      localStorage.setItem("UserName",UserName)
+      navigate("/Skill-Select");
       SetUsername("");
       SetEmail("");
       setCollage("");

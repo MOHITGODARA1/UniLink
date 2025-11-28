@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    Skill:{
+      type:[String],
+      default:[]
+    }
   },
   { timestamps: true }
 );

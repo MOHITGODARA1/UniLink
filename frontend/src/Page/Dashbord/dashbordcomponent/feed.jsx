@@ -1,16 +1,18 @@
 import demoPosts from "./Demopost";
+import { AiFillLike } from "react-icons/ai";
+import { FaRegCommentDots } from "react-icons/fa";
+import { IoShareOutline } from "react-icons/io5";
 
 function Feed() {
   return (
     <div className="flex flex-col mt-5">
 
       {demoPosts.map((post, index) => (
-        <div 
+        <div
           key={index}
           className="w-full max-w-2xl bg-black border border-gray-800 rounded-xl p-4 text-white mb-6"
         >
-          
-          {/* TOP: PROFILE + NAME */}
+          {/* PROFILE TOP */}
           <div className="flex items-start gap-3">
             <img
               src={post.profile}
@@ -40,11 +42,21 @@ function Feed() {
             </div>
           )}
 
-          {/* ACTION BUTTONS */}
+          {/* ACTION BUTTONS WITH ICONS */}
           <div className="flex justify-between mt-4 border-t border-gray-800 pt-3 text-gray-300 text-sm">
-            <button className="hover:text-white transition">Like</button>
-            <button className="hover:text-white transition">Comment</button>
-            <button className="hover:text-white transition">Share</button>
+
+            <button className="flex items-center gap-2 hover:text-white transition">
+              <AiFillLike size={18} /> Like
+            </button>
+
+            <button className="flex items-center gap-2 hover:text-white transition">
+              <FaRegCommentDots size={18} /> Comment
+            </button>
+
+            <button className="flex items-center gap-2 hover:text-white transition">
+              <IoShareOutline size={18} /> Share
+            </button>
+
           </div>
 
         </div>

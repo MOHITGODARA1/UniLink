@@ -1,6 +1,7 @@
 
 import User from "../model/register.model.js";
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 const LoginCheck=async (req,res)=>{
   try {
     const {Name,Password}=req.body;
@@ -26,8 +27,15 @@ const LoginCheck=async (req,res)=>{
         success:false
       });
     }
+    const token=jwt.sign({
+      id:user._id
+    },process.env.JWT_SECRET,
+    {expiresIn:"7d"}
+    )
     return res.status(200).json({
       message: "Login successful",
+      data:user,
+      token,
       success: true,
     });
 

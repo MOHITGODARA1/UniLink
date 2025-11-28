@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import User from "../model/register.model.js";
 import bcrypt from "bcrypt";
-
+import jwt from "jsonwebtoken"
 const RegisterUser = async (req, res) => {
   try {
     const { UserName, Email, Collage, Password } = req.body;
@@ -28,13 +28,13 @@ const RegisterUser = async (req, res) => {
 
     const hashPassword = await bcrypt.hash(Password, 10);
 
-    await User.create({
+    const user=await User.create({
       UserName,
       Email,
       Collage,
       Password: hashPassword,
     });
-
+    
     return res.status(201).json({
       message: "User registered successfully",
       success: true,
