@@ -15,7 +15,9 @@ function UniLinkSidebar() {
             headers: { authorization: token }
           }
         );
-
+        const userData = res.data.user;
+        localStorage.setItem("userId", userData._id);
+        localStorage.setItem("userCollage", userData.Collage);
         setUser(res.data.user);
       } catch (error) {
         console.log("Error fetching user:", error);

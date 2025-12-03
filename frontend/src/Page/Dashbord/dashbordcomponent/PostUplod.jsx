@@ -1,4 +1,38 @@
+import { useState } from "react";
+import axios from "axios";
+
 function Postuplode() {
+  const [content, setContent] = useState("");
+
+  const handleUpload = async () => {
+    const authorId = localStorage.getItem("userId");
+    const Collage = localStorage.getItem("userCollage");
+
+    if (!authorId || !Collage) {
+      alert("User info missing!");
+      return;
+    }
+
+    if (!content.trim()) {
+      alert("Please write something before posting.");
+      return;
+    }
+
+    try {
+      await axios.post(`${import.meta.env.VITE_API}/Uplode-Post`, {
+        content,
+        authorId,
+        Collage
+      });
+
+      alert("Post uploaded successfully!");
+      setContent(""); // reset input
+    } catch (err) {
+      console.log("Error uploading post:", err);
+      alert("Failed to upload post.");
+    }
+  };
+
   return (
     <div
       className="
@@ -13,14 +47,14 @@ function Postuplode() {
     >
       {/* TOP: Avatar + Input */}
       <div className="flex items-center gap-4">
-        {/* PROFILE IMAGE */}
+        
         <img
           src="/profile.png"
           alt="profile"
           className="w-12 h-12 rounded-full border border-gray-700 object-cover"
         />
 
-        {/* INPUT BOX */}
+        {/* Textarea */}
         <textarea
           placeholder="Start a post..."
           className="
@@ -37,30 +71,49 @@ function Postuplode() {
             transition
           "
           rows="3"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
         ></textarea>
       </div>
 
-      {/* DIVIDER */}
+      {/* Divider */}
       <div className="w-full h-px bg-gray-800 my-5"></div>
 
-      {/* BOTTOM ACTIONS */}
-      <div className="flex justify-between px-2">
+      {/* ACTIONS */}
+      <div className="flex justify-between items-center px-2">
 
-        <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
-          <i className="ri-video-line text-green-400 text-xl"></i>
-          <span className="text-sm">Video</span>
+        <div className="flex gap-3">
+          <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
+            <i className="ri-video-line text-green-400 text-xl"></i>
+            <span className="text-sm">Video</span>
+          </button>
+
+          <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
+            <i className="ri-image-2-line text-blue-400 text-xl"></i>
+            <span className="text-sm">Photo</span>
+          </button>
+
+          <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
+            <i className="ri-article-line text-orange-400 text-xl"></i>
+            <span className="text-sm">Write article</span>
+          </button>
+        </div>
+
+        {/* POST BUTTON */}
+        <button
+          onClick={handleUpload}
+          className="
+            bg-blue-600 
+            px-4 py-2 
+            rounded-xl 
+            text-white 
+            text-sm 
+            hover:bg-blue-500 
+            transition
+          "
+        >
+          Post
         </button>
-
-        <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
-          <i className="ri-image-2-line text-blue-400 text-xl"></i>
-          <span className="text-sm">Photo</span>
-        </button>
-
-        <button className="flex items-center gap-2 text-gray-300 hover:text-white transition">
-          <i className="ri-article-line text-orange-400 text-xl"></i>
-          <span className="text-sm">Write article</span>
-        </button>
-
       </div>
     </div>
   );

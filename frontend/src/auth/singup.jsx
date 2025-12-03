@@ -1,16 +1,38 @@
-import { Link,useNavigate  } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Axios from "axios";
 
 function SignUp() {
   const [UserName, SetUsername] = useState("");
   const [Email, SetEmail] = useState("");
-  const [Collage, setCollage] = useState("");
+  const [Collage, setCollage] = useState(""); // only the name
   const [Password, setPassword] = useState("");
   const [ConfirmPassword, setConfirmPassword] = useState("");
   const [Agree, setAgree] = useState(false);
-  const navigate = useNavigate();
   const [Errors, setErrors] = useState({});
+  const [Suggestions, setSuggestions] = useState([]); // array of objects {name,state,city}
+
+  const navigate = useNavigate();
+
+  // 🔎 Search college from backend API
+  const searchCollege = async (value) => {
+    setCollage(value);
+
+    if (value.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const res = await Axios.get(
+        `${import.meta.env.VITE_API}/Search?query=${value}`
+      );
+      setSuggestions(res.data);
+    } catch (error) {
+      setSuggestions([]);
+      console.error(error);
+    }
+  };
 
   const registerUser = async (e) => {
     e.preventDefault();
@@ -36,34 +58,30 @@ function SignUp() {
     try {
       const data = { UserName, Email, Collage, Password };
 
-      await Axios.post(
-        `${import.meta.env.VITE_API}/user-Register`,
-        data
-      );
-      localStorage.setItem("UserName",UserName)
+      await Axios.post(`${import.meta.env.VITE_API}/user-Register`, data);
+      localStorage.setItem("UserName", UserName);
       navigate("/Skill-Select");
+
+      // Clear fields
       SetUsername("");
       SetEmail("");
       setCollage("");
       setPassword("");
       setConfirmPassword("");
       setAgree(false);
+      setSuggestions([]);
 
     } catch (error) {
       if (error.response?.data) {
         const serverError = error.response.data;
-
         let updatedErrors = {};
 
         if (serverError.field === "email") {
           updatedErrors.Email = "Email already exists!";
         }
-
         if (serverError.field === "username") {
           updatedErrors.UserName = "Username is already taken!";
         }
-
-        // fallback general message
         if (!serverError.field) {
           updatedErrors.general = serverError.message || "Something went wrong";
         }
@@ -76,7 +94,6 @@ function SignUp() {
   return (
     <>
       <div className="w-full min-h-screen bg-black flex justify-center items-center px-6 overflow-hidden relative">
-
         <Link
           to="/"
           className="absolute top-6 left-6 text-gray-400 hover:text-white transition flex items-center gap-2"
@@ -96,7 +113,6 @@ function SignUp() {
 
           {/* LEFT SIDE */}
           <div className="flex flex-col justify-center items-center text-center p-10 bg-white/5 border-r border-gray-700">
-
             <img src="./logo.png" alt="logo" className="h-32 mb-6 drop-shadow-xl" />
 
             <h1 className="text-4xl font-bold bg-linear-to-b from-white to-gray-400 text-transparent bg-clip-text">
@@ -106,15 +122,12 @@ function SignUp() {
             <p className="text-gray-300 text-lg mt-4 leading-relaxed px-4">
               Create your Unilink account and start connecting with students across the world.
             </p>
-
           </div>
 
           {/* RIGHT SIDE */}
           <div className="flex flex-col justify-center p-10">
-
             <h2 className="text-3xl font-semibold text-white mb-6">Create Account</h2>
 
-            {/* General Error Message */}
             {Errors.general && (
               <p className="text-red-500 text-sm mb-3">{Errors.general}</p>
             )}
@@ -127,14 +140,7 @@ function SignUp() {
                   type="text"
                   value={UserName}
                   onChange={(e) => SetUsername(e.target.value)}
-                  className="
-                    w-full mt-2 px-4 py-3 
-                    bg-white/5 border border-gray-700 
-                    rounded-xl text-white 
-                    outline-none 
-                    focus:border-blue-400 focus:bg-white/10 
-                    transition
-                  "
+                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
                   placeholder="Enter username"
                 />
                 {Errors.UserName && <p className="text-red-500 text-sm mt-1">{Errors.UserName}</p>}
@@ -146,37 +152,46 @@ function SignUp() {
                   type="email"
                   value={Email}
                   onChange={(e) => SetEmail(e.target.value)}
-                  className="
-                    w-full mt-2 px-4 py-3 
-                    bg-white/5 border border-gray-700 
-                    rounded-xl text-white 
-                    outline-none 
-                    focus:border-blue-400 focus:bg-white/10 
-                    transition
-                  "
+                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
                   placeholder="Enter email"
                 />
                 {Errors.Email && <p className="text-red-500 text-sm mt-1">{Errors.Email}</p>}
               </div>
             </div>
 
-            {/* UNIVERSITY */}
-            <div className="mt-5">
+            {/* UNIVERSITY WITH AUTOCOMPLETE */}
+            <div className="mt-5 relative">
               <label className="text-gray-300 text-sm ml-1">University</label>
+
               <input
                 type="text"
                 value={Collage}
-                onChange={(e) => setCollage(e.target.value)}
-                className="
-                  w-full mt-2 px-4 py-3 
-                  bg-white/5 border border-gray-700 
-                  rounded-xl text-white 
-                  outline-none 
-                  focus:border-blue-400 focus:bg-white/10 
-                  transition
-                "
+                onChange={(e) => searchCollege(e.target.value)}
+                className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
                 placeholder="Enter your university"
               />
+
+              {/* Suggestions Dropdown */}
+              {Suggestions.length > 0 && (
+                <ul className="absolute z-50 w-full bg-white/90 text-black rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto border border-gray-300">
+                  {Suggestions.map((item, index) => (
+                    <li
+                      key={index}
+                      onClick={() => {
+                        setCollage(item.name); // only the name goes into input
+                        setSuggestions([]);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                    >
+                      <p className="font-semibold">{item.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {item.city}, {item.state}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
               {Errors.Collage && <p className="text-red-500 text-sm mt-1">{Errors.Collage}</p>}
             </div>
 
@@ -188,14 +203,7 @@ function SignUp() {
                   type="password"
                   value={Password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="
-                    w-full mt-2 px-4 py-3 
-                    bg-white/5 border border-gray-700 
-                    rounded-xl text-white 
-                    outline-none 
-                    focus:border-blue-400 focus:bg-white/10 
-                    transition
-                  "
+                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
                   placeholder="Create password"
                 />
                 {Errors.Password && <p className="text-red-500 text-sm mt-1">{Errors.Password}</p>}
@@ -207,14 +215,7 @@ function SignUp() {
                   type="password"
                   value={ConfirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="
-                    w-full mt-2 px-4 py-3 
-                    bg-white/5 border border-gray-700 
-                    rounded-xl text-white 
-                    outline-none 
-                    focus:border-blue-400 focus:bg-white/10 
-                    transition
-                  "
+                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
                   placeholder="Confirm password"
                 />
                 {Errors.ConfirmPassword && (
@@ -242,15 +243,7 @@ function SignUp() {
 
             {/* SUBMIT BUTTON */}
             <button
-              className="
-                w-full mt-8 py-3 h-12 
-                bg-white text-black font-semibold 
-                rounded-xl shadow-md 
-                hover:bg-blue-400 hover:text-white 
-                hover:scale-[1.03] 
-                active:scale-95 
-                transition duration-200
-              "
+              className="w-full mt-8 py-3 h-12 bg-white text-black font-semibold rounded-xl shadow-md hover:bg-blue-400 hover:text-white hover:scale-[1.03] active:scale-95 transition duration-200"
               onClick={(e) => registerUser(e)}
             >
               Create Account

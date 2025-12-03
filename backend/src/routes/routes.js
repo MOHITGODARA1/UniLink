@@ -4,6 +4,9 @@ import LoginCheck from "../controllers/Login.js";
 import AuthJwt from "../middlewares/auth.js";
 import Dashbordcheck from "../controllers/Dashbord.controller.js";
 import User from "../model/register.model.js";
+import Search from "../controllers/CollageSearch.controller.js";
+import UploadPost from "../controllers/Post.controller.js";
+import FetchPost from "../controllers/feed.controller.js";
 const router=express.Router();
 
 router.post("/user-Register",RegisterUser);
@@ -11,6 +14,8 @@ router.post("/Login",LoginCheck)
 
 //User Dashbord data fetch
 router.get("/dashboard",AuthJwt,Dashbordcheck)
+
+router.get('/Search',Search);
 
 router.post("/Skill-Set", async (req, res) => {
   try {
@@ -54,4 +59,10 @@ router.post("/Skill-Set", async (req, res) => {
   }
 });
 
+
+// Update Post 
+
+router.post("/Uplode-Post",UploadPost);
+
+router.get("/Post-fetch",FetchPost);
 export default router;
