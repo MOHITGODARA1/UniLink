@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { AiFillLike } from "react-icons/ai";
+import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
 import { IoShareOutline } from "react-icons/io5";
 
@@ -14,73 +14,78 @@ function Feed() {
       const res = await axios.get(
         `${import.meta.env.VITE_API}/Post-fetch?Collage=${Collage}`
       );
-
-      setPosts(res.data.posts); // latest posts
+      setPosts(res.data.posts);
     } catch (err) {
-      console.log("Error fetching posts:", err);
+      console.log("Fetch error:", err);
     }
   };
 
   useEffect(() => {
-    fetchPosts();              // load first time
-
-    const interval = setInterval(() => {
-      fetchPosts();            // 🔥 auto-refetch every 3 sec
-    }, 3000);
-
-    return () => clearInterval(interval); // cleanup
+    fetchPosts();
+    const interval = setInterval(fetchPosts, 3000);
+    return () => clearInterval(interval);
   }, []);
 
+  const toggleLike = (id) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === id
+          ? { ...p, liked: !p.liked, likes: (p.likes || 0) + (p.liked ? -1 : 1) }
+          : p
+      )
+    );
+  };
+
   return (
-    <div className="flex flex-col mt-5">
+    <div>
+      {posts.map((post) => (
+        <div
+          key={post._id}
+          className="bg-[#0d0d0d] border border-gray-800 rounded-2xl p-6 mb-6 shadow-xl"
+        >
+          {/* HEADER */}
+          <div className="flex items-center gap-3">
+            <img
+              src={post.authorId?.ProfilePic || "/Profile.photo.5.jpg"}
+              className="w-12 h-12 rounded-full object-cover border border-gray-700"
+            />
 
-      {posts.length === 0 ? (
-        <p className="text-gray-400 text-center mt-10">No posts yet...</p>
-      ) : (
-        posts.map((post) => (
-          <div
-            key={post._id}
-            className="w-full max-w-2xl bg-black border border-gray-800 rounded-xl p-4 text-white mb-6"
-          >
-            {/* PROFILE TOP */}
-            <div className="flex items-start gap-3">
-              <img
-                src="/profile.png"
-                alt="profile"
-                className="w-10 h-10 rounded-full border border-gray-700"
-              />
-
-              <div>
-                <h3 className="text-sm font-semibold">
-                  {post.authorId?.UserName}
-                </h3>
-                <p className="text-gray-400 text-xs">
-                  {new Date(post.createdAt).toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            {/* TEXT */}
-            <p className="mt-3 text-sm text-gray-200 leading-relaxed">
-              {post.content}
-            </p>
-
-            {/* ACTION BUTTONS */}
-            <div className="flex justify-between mt-4 border-t border-gray-800 pt-3 text-gray-300 text-sm">
-              <button className="flex items-center gap-2 hover:text-white transition">
-                <AiFillLike size={18} /> Like
-              </button>
-              <button className="flex items-center gap-2 hover:text-white transition">
-                <FaRegCommentDots size={18} /> Comment
-              </button>
-              <button className="flex items-center gap-2 hover:text-white transition">
-                <IoShareOutline size={18} /> Share
-              </button>
+            <div>
+              <p className="text-white font-semibold">
+                {post.authorId?.UserName}
+              </p>
+              <p className="text-xs text-gray-400">
+                {new Date(post.createdAt).toLocaleString()}
+              </p>
             </div>
           </div>
-        ))
-      )}
 
+          <div className="border-b border-gray-800 my-3"></div>
+
+          {/* CONTENT */}
+          <p className="text-gray-300 whitespace-pre-line leading-relaxed">
+            {post.content}
+          </p>
+
+          <div className="border-b border-gray-800 mt-4"></div>
+
+          {/* ACTIONS */}
+          <div className="flex justify-around text-gray-300 mt-4 text-sm">
+            <button onClick={() => toggleLike(post._id)} className="flex items-center gap-2">
+              {post.liked ? <AiFillLike className="text-blue-500" /> : <AiOutlineLike />}
+              {post.likes || 0} Like
+            </button>
+
+            <button className="flex items-center gap-2">
+              <FaRegCommentDots /> Comment
+            </button>
+
+            <button className="flex items-center gap-2">
+              <IoShareOutline /> Share
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

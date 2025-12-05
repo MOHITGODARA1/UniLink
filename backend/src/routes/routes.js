@@ -7,21 +7,23 @@ import User from "../model/register.model.js";
 import Search from "../controllers/CollageSearch.controller.js";
 import UploadPost from "../controllers/Post.controller.js";
 import FetchPost from "../controllers/feed.controller.js";
-const router=express.Router();
+import fetchUserPosts from "../controllers/UserPost.controller.js";
+const router = express.Router();
 
-router.post("/user-Register",RegisterUser);
-router.post("/Login",LoginCheck)
+router.post("/user-Register", RegisterUser);
+router.post("/Login", LoginCheck);
 
-//User Dashbord data fetch
-router.get("/dashboard",AuthJwt,Dashbordcheck)
+// Dashboard
+router.get("/dashboard", AuthJwt, Dashbordcheck);
 
-router.get('/Search',Search);
+// Search colleges
+router.get("/Search", Search);
 
+// Skill Set Update
 router.post("/Skill-Set", async (req, res) => {
   try {
     const { UserName, Skill } = req.body;
 
-    // 1. Validate data
     if (!UserName || !Skill || !Array.isArray(Skill) || Skill.length === 0) {
       return res.status(400).json({
         message: "UserName and Skill array are required",
@@ -29,7 +31,6 @@ router.post("/Skill-Set", async (req, res) => {
       });
     }
 
-    // 2. Check user exists
     const user = await User.findOne({ UserName });
 
     if (!user) {
@@ -39,19 +40,17 @@ router.post("/Skill-Set", async (req, res) => {
       });
     }
 
-    // 3. Update the user's skills
     user.Skill = Skill;
     await user.save();
 
-    // 4. Success response
-    res.status(200).json({
+    return res.status(200).json({
       message: "Skills updated successfully",
       success: true,
       user,
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
       success: false,
       error: error.message,
@@ -59,10 +58,13 @@ router.post("/Skill-Set", async (req, res) => {
   }
 });
 
+// Create Post
+router.post("/Uplode-Post", UploadPost);
 
-// Update Post 
+// Fetch Posts
+router.get("/Post-fetch", FetchPost);
 
-router.post("/Uplode-Post",UploadPost);
+//User Post Fetch
+router.get("/fetch-user-posts",fetchUserPosts)
 
-router.get("/Post-fetch",FetchPost);
 export default router;

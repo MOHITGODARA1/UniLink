@@ -2,7 +2,7 @@ import postModel from "../model/post.model.js";
 
 const FetchPost = async (req, res) => {
   try {
-    const { Collage } = req.query;
+    const { Collage,id } = req.query;
 
     if (!Collage) {
       return res.status(400).json({
@@ -21,7 +21,8 @@ const FetchPost = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    console.error("FetchPost Error:", error.message);
+
     return res.status(500).json({
       message: "Failed to fetch posts",
       error: error.message,
