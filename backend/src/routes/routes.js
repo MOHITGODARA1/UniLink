@@ -8,7 +8,9 @@ import Search from "../controllers/CollageSearch.controller.js";
 import UploadPost from "../controllers/Post.controller.js";
 import FetchPost from "../controllers/feed.controller.js";
 import fetchUserPosts from "../controllers/UserPost.controller.js";
+import multer from "multer";
 const router = express.Router();
+const upload = multer({ dest: "uploads/" });
 
 router.post("/user-Register", RegisterUser);
 router.post("/Login", LoginCheck);
@@ -59,7 +61,7 @@ router.post("/Skill-Set", async (req, res) => {
 });
 
 // Create Post
-router.post("/Uplode-Post", UploadPost);
+router.post("/Uplode-Post", upload.single("media"), UploadPost);
 
 // Fetch Posts
 router.get("/Post-fetch", FetchPost);

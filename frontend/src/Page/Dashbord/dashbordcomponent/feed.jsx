@@ -62,10 +62,31 @@ function Feed() {
 
           <div className="border-b border-gray-800 my-3"></div>
 
-          {/* CONTENT */}
-          <p className="text-gray-300 whitespace-pre-line leading-relaxed">
-            {post.content}
-          </p>
+          {/* TEXT CONTENT */}
+          {post.content && (
+            <p className="text-gray-300 whitespace-pre-line leading-relaxed mb-4">
+              {post.content}
+            </p>
+          )}
+
+          {/* MEDIA CONTENT (IMAGE OR VIDEO) */}
+          {post.mediaUrl && post.mediaType !== "none" && (
+            <div className="border border-gray-700 rounded-xl bg-black mb-4 h-72 flex items-center justify-center overflow-hidden">
+              {post.mediaType === "video" ? (
+                <video
+                  src={post.mediaUrl}
+                  controls
+                  className="max-h-full max-w-full object-contain rounded-xl"
+                />
+              ) : (
+                <img
+                  src={post.mediaUrl}
+                  alt="media"
+                  className="max-h-full max-w-full object-contain rounded-xl"
+                />
+              )}
+            </div>
+          )}
 
           <div className="border-b border-gray-800 mt-4"></div>
 
