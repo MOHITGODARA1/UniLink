@@ -6,15 +6,27 @@ import { IoShareOutline } from "react-icons/io5";
 
 function Feed() {
   const [posts, setPosts] = useState([]);
+  const [commentText, setCommentText] = useState({});
+  const [showComments, setShowComments] = useState({}); // store visibility for each post
 
+  const userId = localStorage.getItem("userId");
+  const Collage = localStorage.getItem("userCollage");
+
+  // ---------------------------------------------------
+  // FETCH POSTS
+  // ---------------------------------------------------
   const fetchPosts = async () => {
-    const Collage = localStorage.getItem("userCollage");
-
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API}/Post-fetch?Collage=${Collage}`
       );
-      setPosts(res.data.posts);
+
+      const formatted = res.data.posts.map((post) => ({
+        ...post,
+        liked: post.likes?.includes(userId),
+      }));
+
+      setPosts(formatted);
     } catch (err) {
       console.log("Fetch error:", err);
     }
@@ -26,14 +38,64 @@ function Feed() {
     return () => clearInterval(interval);
   }, []);
 
-  const toggleLike = (id) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p._id === id
-          ? { ...p, liked: !p.liked, likes: (p.likes || 0) + (p.liked ? -1 : 1) }
-          : p
-      )
-    );
+  // ---------------------------------------------------
+  // LIKE / UNLIKE POST
+  // ---------------------------------------------------
+  const toggleLike = async (postId) => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/toggle-like`, {
+        postId,
+        userId,
+      });
+
+      const updatedLikes = res.data.likesCount;
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === postId
+            ? { ...p, liked: !p.liked, likes: new Array(updatedLikes) }
+            : p
+        )
+      );
+    } catch (err) {
+      console.log("Like Error:", err);
+    }
+  };
+
+  // ---------------------------------------------------
+  // ADD COMMENT
+  // ---------------------------------------------------
+  const addComment = async (postId) => {
+    const text = commentText[postId];
+    if (!text || !text.trim()) return;
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/add-comment`, {
+        postId,
+        userId,
+        text,
+      });
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === postId ? { ...p, comments: res.data.comments } : p
+        )
+      );
+
+      setCommentText((prev) => ({ ...prev, [postId]: "" }));
+    } catch (err) {
+      console.log("Comment Error:", err);
+    }
+  };
+
+  // ---------------------------------------------------
+  // TOGGLE COMMENTS VISIBILITY
+  // ---------------------------------------------------
+  const toggleCommentsSection = (postId) => {
+    setShowComments((prev) => ({
+      ...prev,
+      [postId]: !prev[postId], // toggle
+    }));
   };
 
   return (
@@ -69,7 +131,7 @@ function Feed() {
             </p>
           )}
 
-          {/* MEDIA CONTENT (IMAGE OR VIDEO) */}
+          {/* MEDIA CONTENT */}
           {post.mediaUrl && post.mediaType !== "none" && (
             <div className="border border-gray-700 rounded-xl bg-black mb-4 h-72 flex items-center justify-center overflow-hidden">
               {post.mediaType === "video" ? (
@@ -90,21 +152,83 @@ function Feed() {
 
           <div className="border-b border-gray-800 mt-4"></div>
 
-          {/* ACTIONS */}
+          {/* ACTION BUTTONS */}
           <div className="flex justify-around text-gray-300 mt-4 text-sm">
-            <button onClick={() => toggleLike(post._id)} className="flex items-center gap-2">
-              {post.liked ? <AiFillLike className="text-blue-500" /> : <AiOutlineLike />}
-              {post.likes || 0} Like
+            <button
+              onClick={() => toggleLike(post._id)}
+              className="flex items-center gap-2"
+            >
+              {post.liked ? (
+                <AiFillLike className="text-blue-500" />
+              ) : (
+                <AiOutlineLike />
+              )}
+              {post.likes?.length || 0} Like
             </button>
 
-            <button className="flex items-center gap-2">
-              <FaRegCommentDots /> Comment
+            {/* COMMENT BUTTON: toggles visibility */}
+            <button
+              onClick={() => toggleCommentsSection(post._id)}
+              className="flex items-center gap-2"
+            >
+              <FaRegCommentDots />
+              Comment
             </button>
 
             <button className="flex items-center gap-2">
               <IoShareOutline /> Share
             </button>
           </div>
+
+          {/* COMMENT SECTION - ONLY SHOW WHEN CLICKED */}
+          {showComments[post._id] && (
+            <div className="mt-4">
+
+              {/* COMMENT INPUT + POST BUTTON */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Write a comment..."
+                  value={commentText[post._id] || ""}
+                  onChange={(e) =>
+                    setCommentText((prev) => ({
+                      ...prev,
+                      [post._id]: e.target.value,
+                    }))
+                  }
+                  className="flex-1 p-2 rounded bg-[#1a1a1a] text-white border border-gray-700"
+                />
+
+                <button
+                  onClick={() => addComment(post._id)}
+                  className="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700"
+                >
+                  Post
+                </button>
+              </div>
+
+              {/* SHOW ALL COMMENTS */}
+              {post.comments?.length > 0 && (
+                <div className="mt-4">
+                  {post.comments.map((c) => (
+                    <div key={c._id} className="flex items-start gap-2 mb-3">
+                      <img
+                        src={c.userId?.ProfilePic || "/Profile.photo.5.jpg"}
+                        className="w-8 h-8 rounded-full"
+                      />
+
+                      <div className="bg-[#1f1f1f] p-2 rounded-xl text-gray-300">
+                        <p className="font-semibold text-sm">
+                          {c.userId?.UserName}
+                        </p>
+                        <p className="text-sm">{c.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>

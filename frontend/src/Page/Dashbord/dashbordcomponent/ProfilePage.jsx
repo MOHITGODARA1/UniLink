@@ -8,15 +8,23 @@ import { IoShareOutline } from "react-icons/io5";
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [isFollowing, setIsFollowing] = useState(false);
+
+  // Edit profile modal
   const [openEdit, setOpenEdit] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
-  // ⭐ NEW STATE → OPEN SKILL MODAL
+  // Skills modal
   const [openSkillModal, setOpenSkillModal] = useState(false);
-
-  // ⭐ NEW STATE → FOR SKILL SELECT MODAL
   const [inputSkill, setInputSkill] = useState("");
   const [selectedSkills, setSelectedSkills] = useState([]);
+
+  // Comments + Like UI states
+  const [openComments, setOpenComments] = useState({});
+  const [commentText, setCommentText] = useState({});
 
   const token = localStorage.getItem("Token");
 
@@ -29,7 +37,8 @@ function Profile() {
     "Data Engineering","TensorFlow","OpenCV"
   ];
 
-  // ============================ FETCH USER POSTS ============================
+  // ====================== FETCH USER POSTS ======================
+
   const fetchUserPosts = async (id) => {
     try {
       const res = await axios.get(
@@ -41,7 +50,8 @@ function Profile() {
     }
   };
 
-  // ============================ FETCH USER DATA ============================
+  // ====================== FETCH USER DATA ======================
+
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -52,8 +62,7 @@ function Profile() {
         const u = res.data.user;
 
         setUser(u);
-        setIsFollowing(false);
-        setSelectedSkills(u.Skill || []);  // ⭐ PRE-SELECT SKILLS
+        setSelectedSkills(u.Skill || []);
 
         fetchUserPosts(u._id);
       } catch (err) {
@@ -64,15 +73,74 @@ function Profile() {
     loadUser();
   }, []);
 
-  // FOLLOW BUTTON
-  const handleFollow = () => setIsFollowing((prev) => !prev);
+  // ====================== UPDATE PROFILE ======================
 
-  // MESSAGE BUTTON
-  const handleMessage = () => alert("Messaging feature coming soon!");
+  const saveProfile = async () => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/update-profile`, {
+        userId: user._id,
+        UserName: editName,
+        Email: editEmail,
+        Bio: editBio,
+        OldPassword: oldPassword,
+        NewPassword: newPassword,
+      });
 
-  // =====================================================================================
-  // ⭐ SKILL MODAL FUNCTIONS (No UI changes — your original SkillSelect UI is reused)
-  // =====================================================================================
+      alert("Profile Updated Successfully!");
+      setUser(res.data.user);
+      setOpenEdit(false);
+
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update profile");
+    }
+  };
+
+  // ====================== LIKE SYSTEM ======================
+
+  const toggleLike = async (postId) => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/toggle-like`, {
+        postId,
+        userId: user._id,
+      });
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === postId
+            ? { ...p, likes: res.data.likesCount }
+            : p
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ====================== COMMENTS ======================
+
+  const addComment = async (postId) => {
+    if (!commentText[postId]?.trim()) return;
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/add-comment`, {
+        postId,
+        userId: user._id,
+        text: commentText[postId],
+      });
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === postId ? { ...p, comments: res.data.comments } : p
+        )
+      );
+
+      setCommentText((prev) => ({ ...prev, [postId]: "" }));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ====================== SKILL FUNCTIONS ======================
 
   const addTypedSkill = () => {
     if (!inputSkill.trim()) return;
@@ -105,15 +173,14 @@ function Profile() {
       alert("Skills Updated Successfully!");
       setOpenSkillModal(false);
     } catch (err) {
-      alert("Failed to update skills",err);
+      alert("Failed to update skills");
+      console.log(err);
     }
   };
-
 
   if (!user) {
     return <div className="text-white p-6">Loading profile...</div>;
   }
-
 
   return (
     <>
@@ -122,101 +189,83 @@ function Profile() {
       <div className="w-full min-h-screen bg-black px-4 md:px-6 py-8 flex justify-center">
         <div className="w-full max-w-5xl flex flex-col md:flex-row gap-6">
 
-          {/* ====================== LEFT COLUMN (PROFILE + STATS) ====================== */}
+          {/* ====================== LEFT COLUMN ====================== */}
           <div className="w-full md:w-1/3 flex flex-col gap-4">
 
-            {/* PROFILE CARD */}
+            {/* ====================== PROFILE CARD ====================== */}
             <div className="bg-[#0d0d0d] border border-gray-800 rounded-2xl p-6 shadow-xl">
               <div className="flex flex-col items-center">
 
                 {/* Avatar */}
-                <div className="relative">
-                  <img
-                    src={user.ProfilePic ? user.ProfilePic : "/Profile.photo.5.jpg"}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full border-2 border-blue-500 object-cover shadow-lg"
-                  />
-                  <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-[#0d0d0d]"></span>
+                <img
+                  src={user.ProfilePic || "/Profile.photo.5.jpg"}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full border-2 border-blue-500 object-cover shadow-lg"
+                />
+
+                {/* USERNAME */}
+                <div className="mt-4 text-center">
+                  <h1 className="text-xl text-white font-semibold">{user.UserName}</h1>
                 </div>
 
-                {/* Name / Email / College */}
-                <h1 className="text-xl text-white font-semibold mt-3 text-center">
-                  {user.UserName}
-                </h1>
-                <p className="text-gray-400 text-xs mt-1">{user.Email}</p>
-                <p className="text-purple-300 text-xs mt-1 text-center">
-                  {user.Collage}
-                </p>
-
-                {/* Bio */}
-                <p className="text-gray-400 mt-3 text-center text-xs leading-relaxed">
-                  {user.Bio ? user.Bio : "No bio added yet."}
-                </p>
-
-                {/* Buttons */}
-                <div className="flex flex-wrap gap-2 mt-4 justify-center">
-                  <button
-                    onClick={handleFollow}
-                    className={`px-4 py-1.5 rounded-full text-xs font-medium transition
-                      ${
-                        isFollowing
-                          ? "bg-gray-700 hover:bg-gray-600 text-white"
-                          : "bg-blue-600 hover:bg-blue-500 text-white"
-                      }`}
-                  >
-                    {isFollowing ? "Following" : "Follow"}
-                  </button>
-
-                  <button
-                    onClick={handleMessage}
-                    className="px-4 py-1.5 rounded-full text-xs font-medium border border-gray-700 
-                    bg-white/5 hover:bg-white/10 text-white transition"
-                  >
-                    Message
-                  </button>
-
-                  <button
-                    onClick={() => setOpenEdit(true)}
-                    className="px-4 py-1.5 rounded-full text-xs font-medium bg-green-600 
-                    hover:bg-green-500 text-white transition"
-                  >
-                    Edit Profile
-                  </button>
+                {/* EMAIL */}
+                <div className="mt-3 text-center">
+                  <p className="text-gray-300 text-xs">{user.Email}</p>
                 </div>
+
+                {/* COLLEGE */}
+                <div className="mt-3 text-center">
+                  <p className="text-purple-300 text-xs font-medium">{user.Collage}</p>
+                </div>
+
+                {/* BIO */}
+                <div className="mt-4 text-center max-w-[90%]">
+                  <p className="text-gray-400 text-xs leading-relaxed">
+                    {user.Bio || "No bio added yet."}
+                  </p>
+                </div>
+
+                {/* EDIT BUTTON */}
+                <button
+                  onClick={() => {
+                    setEditName(user.UserName);
+                    setEditEmail(user.Email);
+                    setEditBio(user.Bio || "");
+                    setOldPassword("");
+                    setNewPassword("");
+                    setOpenEdit(true);
+                  }}
+                  className="mt-5 px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-full text-xs"
+                >
+                  Edit Profile
+                </button>
               </div>
             </div>
 
-            {/* STATS CARD */}
+            {/* ====================== STATS ====================== */}
             <div className="bg-[#0d0d0d] border border-gray-800 rounded-2xl p-4 shadow-lg">
-              <h3 className="text-gray-300 text-xs font-semibold mb-3">
-                Stats
-              </h3>
+              <h3 className="text-gray-300 text-xs font-semibold mb-3">Stats</h3>
 
               <div className="flex justify-between">
                 <div className="text-center flex-1">
-                  <p className="text-white text-lg font-bold">
-                    {user.Followers?.length || 0}
-                  </p>
+                  <p className="text-white text-lg font-bold">{user.Followers?.length || 0}</p>
                   <p className="text-gray-400 text-xs">Followers</p>
                 </div>
 
                 <div className="h-10 w-px bg-gray-800 mx-2" />
 
                 <div className="text-center flex-1">
-                  <p className="text-white text-lg font-bold">
-                    {user.Following?.length || 0}
-                  </p>
+                  <p className="text-white text-lg font-bold">{user.Following?.length || 0}</p>
                   <p className="text-gray-400 text-xs">Following</p>
                 </div>
               </div>
             </div>
 
-            {/* SKILLS CARD */}
+            {/* ====================== SKILLS ====================== */}
             <div className="bg-[#0d0d0d] border border-gray-800 rounded-2xl p-4 shadow-lg">
               <div className="flex justify-between items-center">
                 <h3 className="text-gray-300 text-xs font-semibold">Skills</h3>
 
-                {/* ⭐ NEW BUTTON → OPEN SKILL MODAL */}
                 <button
                   onClick={() => setOpenSkillModal(true)}
                   className="text-blue-400 text-xs underline"
@@ -224,9 +273,10 @@ function Profile() {
                   Update Skill
                 </button>
               </div>
+
               <div className="flex flex-wrap gap-2 mt-3">
-                {user.Skill && user.Skill.length > 0 ? (
-                  user.Skill.map((skill, index) => (
+                {selectedSkills.length > 0 ? (
+                  selectedSkills.map((skill, index) => (
                     <span
                       key={index}
                       className="px-3 py-1 text-[11px] rounded-full border border-gray-700 text-blue-300 bg-white/5"
@@ -245,152 +295,215 @@ function Profile() {
           {/* ====================== RIGHT COLUMN (POSTS) ====================== */}
           <div className="w-full md:w-2/3">
 
-            <h2 className="text-xl font-semibold text-white mb-3">
-              Your Posts
-            </h2>
+            <h2 className="text-xl text-white font-semibold mb-3">Your Posts</h2>
 
             <div className="space-y-4">
               {posts.length === 0 ? (
-                <p className="text-gray-500 text-sm">
-                  You haven’t posted anything yet.
-                </p>
+                <p className="text-gray-500 text-sm">You haven't posted anything yet.</p>
               ) : (
                 posts.map((post) => (
                   <div
                     key={post._id}
-                    className="bg-[#0d0d0d] border border-gray-800 rounded-2xl p-5 shadow-lg
-                    hover:border-gray-600 transition-all"
+                    className="bg-[#0d0d0d] border border-gray-800 rounded-2xl p-5 shadow-lg"
                   >
-                    {/* Header row: avatar + name + time */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={user.ProfilePic ? user.ProfilePic : "/Profile.photo.5.jpg"}
-                          alt="Profile"
-                          className="w-9 h-9 rounded-full object-cover border border-gray-700"
-                        />
-                        <div>
-                          <p className="text-sm font-semibold text-white">
-                            {user.UserName}
-                          </p>
-                          <p className="text-[11px] text-gray-400">
-                            {user.Collage}
-                          </p>
-                        </div>
-                      </div>
 
-                      <p className="text-[11px] text-gray-500">
-                        {new Date(post.createdAt).toLocaleString()}
-                      </p>
+                    {/* HEADER */}
+                    <div className="flex items-center mb-3">
+                      <img
+                        src={user.ProfilePic || "/Profile.photo.5.jpg"}
+                        className="w-9 h-9 rounded-full border border-gray-700 mr-3"
+                      />
+                      <div>
+                        <p className="text-sm text-white font-semibold">{user.UserName}</p>
+                        <p className="text-[11px] text-gray-400">{user.Collage}</p>
+                      </div>
                     </div>
 
-                    {/* Content */}
-                    <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line">
-                      {post.content}
-                    </p>
+                    {/* TEXT CONTENT */}
+                    <p className="text-gray-300 text-sm">{post.content}</p>
 
-                    {/* Divider */}
-                    <div className="mt-4 border-t border-gray-800"></div>
+                    {/* MEDIA PREVIEW */}
+                    {post.mediaUrl && (
+                      <div className="mt-3 rounded-xl overflow-hidden border border-gray-700">
+                        {post.mediaType === "image" ? (
+                          <img
+                            src={post.mediaUrl}
+                            className="w-full max-h-96 object-cover"
+                          />
+                        ) : (
+                          <video
+                            src={post.mediaUrl}
+                            controls
+                            className="w-full max-h-96 object-cover"
+                          />
+                        )}
+                      </div>
+                    )}
 
-                    {/* Actions row */}
-                    <div className="flex justify-around mt-2 text-gray-300 text-xs">
+                    <div className="border-t border-gray-800 my-3"></div>
 
-                      <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition">
-                        <AiFillLike size={16} />
+                    {/* ACTION BAR */}
+                    <div className="flex justify-between text-gray-300 text-xs">
+
+                      {/* LIKE */}
+                      <button
+                        onClick={() => toggleLike(post._id)}
+                        className="flex items-center gap-2 hover:text-blue-400"
+                      >
+                        <AiFillLike
+                          size={16}
+                          className={
+                            post.likes?.includes(user._id)
+                              ? "text-blue-500"
+                              : "text-gray-300"
+                          }
+                        />
                         <span>{post.likes?.length || 0}</span>
                         <span>Like</span>
                       </button>
 
-                      <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition">
+                      {/* COMMENT */}
+                      <button
+                        onClick={() =>
+                          setOpenComments((prev) => ({
+                            ...prev,
+                            [post._id]: !prev[post._id],
+                          }))
+                        }
+                        className="flex items-center gap-2 hover:text-blue-400"
+                      >
                         <FaRegCommentDots size={16} />
                         <span>{post.comments?.length || 0}</span>
                         <span>Comments</span>
                       </button>
 
-                      <button className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition">
+                      <button className="flex items-center gap-2">
                         <IoShareOutline size={16} />
-                        <span>{post.shares || 0}</span>
                         <span>Share</span>
                       </button>
-
                     </div>
+
+                    {/* COMMENTS */}
+                    {openComments[post._id] && (
+                      <div className="mt-4 p-3 bg-black/30 border border-gray-800 rounded-xl">
+
+                        {/* COMMENT INPUT */}
+                        <div className="flex gap-2 mb-3">
+                          <input
+                            type="text"
+                            value={commentText[post._id] || ""}
+                            onChange={(e) =>
+                              setCommentText((prev) => ({
+                                ...prev,
+                                [post._id]: e.target.value,
+                              }))
+                            }
+                            className="flex-1 bg-black border border-gray-700 rounded-lg px-3 py-1 text-gray-200"
+                            placeholder="Write a comment..."
+                          />
+
+                          <button
+                            onClick={() => addComment(post._id)}
+                            className="px-3 py-1 bg-blue-600 rounded-lg text-white"
+                          >
+                            Post
+                          </button>
+                        </div>
+
+                        {/* SHOW COMMENTS */}
+                        {post.comments?.map((c) => (
+                          <div key={c._id} className="mb-2">
+                            <p className="text-blue-300 text-xs font-semibold">
+                              {c.userId?.UserName || "Unknown User"}
+                            </p>
+                            <p className="text-gray-300 text-sm">{c.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))
               )}
             </div>
-
           </div>
         </div>
       </div>
 
       {/* ====================== EDIT PROFILE MODAL ====================== */}
       {openEdit && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50">
-          <div className="bg-[#111] border border-gray-700 rounded-2xl p-6 w-full max-w-md text-white shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+          <div className="bg-[#111] p-6 rounded-2xl border border-gray-700 shadow-2xl w-full max-w-md">
 
-            <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
+            <h2 className="text-xl font-bold text-white mb-4">Edit Profile</h2>
 
+            {/* NAME */}
+            <label className="text-xs text-gray-400">Name</label>
             <input
-              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3 text-sm"
-              placeholder="Name"
-              defaultValue={user.UserName}
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3"
             />
 
+            {/* EMAIL */}
+            <label className="text-xs text-gray-400">Email</label>
             <input
-              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3 text-sm"
-              placeholder="Email"
-              defaultValue={user.Email}
+              value={editEmail}
+              onChange={(e) => setEditEmail(e.target.value)}
+              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3"
             />
 
+            {/* BIO */}
+            <label className="text-xs text-gray-400">Bio</label>
             <textarea
-              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3 text-sm"
-              placeholder="Bio"
+              value={editBio}
+              onChange={(e) => setEditBio(e.target.value)}
+              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3"
               rows="3"
-              defaultValue={user.Bio}
             ></textarea>
 
-            {/* <input
-              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3 text-sm"
-              placeholder="Skills (comma separated)"
-              defaultValue={user.Skill?.join(", ")}
-            /> */}
+            {/* OLD PASSWORD */}
+            <label className="text-xs text-gray-400">Old Password</label>
             <input
               type="password"
-              placeholder="Old Password"
-              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-sm mb-3"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="w-full bg-black border border-gray-700 p-2 rounded-lg mb-3"
             />
 
+            {/* NEW PASSWORD */}
+            <label className="text-xs text-gray-400">New Password</label>
             <input
               type="password"
-              className="w-full bg-black border border-gray-700 p-2 rounded-lg text-white mb-3 text-sm"
-              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full bg-black border border-gray-700 p-2 rounded-lg mb-3"
             />
 
+            {/* BUTTONS */}
             <div className="flex justify-end gap-3 mt-4">
               <button
-                className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 text-sm"
                 onClick={() => setOpenEdit(false)}
+                className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"
               >
                 Cancel
               </button>
 
               <button
-                className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-500 text-sm"
-                // onClick={handleSaveProfile}
+                onClick={saveProfile}
+                className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-500"
               >
                 Save
               </button>
             </div>
-
           </div>
         </div>
       )}
-            {/* ====================== SKILL SELECT MODAL (ORIGINAL DESIGN) ====================== */}
+
+      {/* ====================== SKILL MODAL ====================== */}
       {openSkillModal && (
         <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4">
           <div className="relative w-full max-w-2xl bg-[#0f0f0f] text-white p-6 rounded-2xl border border-gray-800">
 
-            {/* ❌ CLOSE BUTTON */}
             <button
               onClick={() => setOpenSkillModal(false)}
               className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl"
@@ -400,7 +513,6 @@ function Profile() {
 
             <h2 className="text-2xl font-bold mb-4 text-center">Choose Your Skills</h2>
 
-            {/* INPUT */}
             <div className="flex gap-2">
               <input
                 className="w-full px-4 py-2 h-12 rounded-xl bg-black/40 border border-gray-700"
@@ -411,11 +523,8 @@ function Profile() {
               />
             </div>
 
-            {/* SELECTED SKILLS */}
             <div className="mt-4 flex flex-wrap gap-2">
-              {selectedSkills.length === 0 ? (
-                <p className="text-gray-400 text-sm">No skills selected</p>
-              ) : (
+              {selectedSkills.length > 0 ? (
                 selectedSkills.map((skill) => (
                   <span
                     key={skill}
@@ -427,10 +536,11 @@ function Profile() {
                     </button>
                   </span>
                 ))
+              ) : (
+                <p className="text-gray-400 text-sm">No skills selected</p>
               )}
             </div>
 
-            {/* SUGGESTED SKILLS */}
             <h3 className="text-gray-300 font-semibold mt-6 mb-2">Suggested Skills</h3>
 
             <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-2">
@@ -445,7 +555,6 @@ function Profile() {
               ))}
             </div>
 
-            {/* SAVE BUTTON */}
             <button
               onClick={updateSkillAPI}
               className="w-full mt-8 py-3 h-12 bg-blue-600 rounded-xl text-lg font-semibold hover:bg-blue-700 transition"
@@ -456,7 +565,6 @@ function Profile() {
           </div>
         </div>
       )}
-
 
     </>
   );

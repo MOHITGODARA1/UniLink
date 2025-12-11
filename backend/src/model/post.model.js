@@ -1,5 +1,18 @@
 import mongoose from "mongoose";
 
+const commentSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  text: {
+    type: String,
+    required: true
+  },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const PostSchema = new mongoose.Schema(
   {
     content: {
@@ -17,14 +30,14 @@ const PostSchema = new mongoose.Schema(
       required: true
     },
 
-    // ⭐ NEW FIELDS for IMAGE / VIDEO upload
+    // MEDIA FIELDS
     mediaUrl: {
-      type: String, // Cloudinary URL
+      type: String,
       default: null
     },
 
     mediaPublicId: {
-      type: String, // Cloudinary public ID (used for delete)
+      type: String,
       default: null
     },
 
@@ -32,7 +45,18 @@ const PostSchema = new mongoose.Schema(
       type: String,
       enum: ["image", "video", "none"],
       default: "none"
-    }
+    },
+
+    // ⭐ NEW LIKE SYSTEM
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ],
+
+    // ⭐ NEW COMMENT SYSTEM
+    comments: [commentSchema]
   },
   { timestamps: true }
 );

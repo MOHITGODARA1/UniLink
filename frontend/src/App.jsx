@@ -11,6 +11,7 @@ import Event from "./Page/Dashbord/dashbordcomponent/Events";
 import Message from "./Page/Dashbord/dashbordcomponent/Message";
 import Notification from "./Page/Dashbord/dashbordcomponent/notification";
 import Profile from "./Page/Dashbord/dashbordcomponent/ProfilePage";
+import ProfileView from "./components/Layout/Profile.view";
 export default function App() {
   return (
     <>
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/Message" element={<Message />} />
         <Route path="/notification" element={<Notification />} />
         <Route path="/Profile" element={<Profile />} />
+        <Route path="/profile/:id" element={<ProfileView />} />
 
       </Routes>
     </>

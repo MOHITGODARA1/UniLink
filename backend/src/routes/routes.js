@@ -8,7 +8,12 @@ import Search from "../controllers/CollageSearch.controller.js";
 import UploadPost from "../controllers/Post.controller.js";
 import FetchPost from "../controllers/feed.controller.js";
 import fetchUserPosts from "../controllers/UserPost.controller.js";
+import { Suggestion, UserProfile, UserPosts } from "../controllers/UserSuggest.controller.js";
+import FollowandUnfollowLogic from "../controllers/Followandunfollow.controller.js";
 import multer from "multer";
+import { toggleLike } from "../controllers/like.controller.js";
+import { addComment } from "../controllers/comment.controller.js";
+import UpdateProfile from "../controllers/updateProfile.controller.js";
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
@@ -68,5 +73,19 @@ router.get("/Post-fetch", FetchPost);
 
 //User Post Fetch
 router.get("/fetch-user-posts",fetchUserPosts)
+
+//Fetch SUggestion for follow
+router.get("/Suggestion-User/:userId", Suggestion);
+router.get("/user-profile/:id", UserProfile);
+router.get("/user-posts/:id", UserPosts);
+
+//Follow and unfollow Logic
+router.post("/follow-unfollow", AuthJwt, FollowandUnfollowLogic);
+
+//Like and comment
+router.post("/toggle-like", toggleLike);
+router.post("/add-comment", addComment);
+//Update profile
+router.post("/update-profile", UpdateProfile);
 
 export default router;

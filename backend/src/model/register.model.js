@@ -8,29 +8,51 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+
     Email: {
       type: String,
       required: true,
       trim: true,
       unique: true,
     },
+
     Collage: {
       type: String,
       required: true,
       trim: true,
     },
+
     Password: {
       type: String,
       required: true,
     },
-    Skill:{
-      type:[String],
-      default:[]
-    }
+
+    Skill: {
+      type: [String],
+      default: []
+    },
+
+    Bio: {
+      type: String,
+      default: ""
+    },
+
+    Followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      }
+    ],
+
+    Following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      }
+    ],
   },
   { timestamps: true }
 );
 
 const User = mongoose.model("User", UserSchema);
-
 export default User;
