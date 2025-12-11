@@ -4,7 +4,7 @@ import ConnectDB from "./db/Connectdb.js";
 import app from "./app.js";
 
 dotenv.config();
-
+app.use(express.static("public"));
 ConnectDB()
   .then(() => {
     const PORT = process.env.PORT || 5000;
