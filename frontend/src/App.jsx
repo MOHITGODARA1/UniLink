@@ -5,7 +5,7 @@ import SignUp from "./auth/singup";
 import DasbordPage from "./Page/Dashbord/Dasbordpage";
 import ProtectedRoute from "./auth/Protector";
 import SkillSelect from "./auth/Skill.Select";
-import StudyResourse from "./Page/Dashbord/dashbordcomponent/StudyResourse";
+import StudyResourse from "./Page/Dashbord/dashbordcomponent/Studyresourse/studyresourse";
 import GroupTeam from "./Page/Dashbord/dashbordcomponent/Groups";
 import Event from "./Page/Dashbord/dashbordcomponent/Events";
 import Message from "./Page/Dashbord/dashbordcomponent/Message";

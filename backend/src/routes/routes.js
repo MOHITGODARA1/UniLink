@@ -11,6 +11,12 @@ import fetchUserPosts from "../controllers/UserPost.controller.js";
 import { Suggestion, UserProfile, UserPosts } from "../controllers/UserSuggest.controller.js";
 import FollowandUnfollowLogic from "../controllers/Followandunfollow.controller.js";
 import multer from "multer";
+import {
+  uploadPdf,
+  getAllPdfs,
+  getPdf,
+  deletePdf,
+} from "../controllers/study.controller.js";
 import { toggleLike } from "../controllers/like.controller.js";
 import { addComment } from "../controllers/comment.controller.js";
 import UpdateProfile from "../controllers/updateProfile.controller.js";
@@ -88,4 +94,11 @@ router.post("/add-comment", addComment);
 //Update profile
 router.post("/update-profile", UpdateProfile);
 
+// Multer for PDF upload
+
+
+router.post("/study/upload", upload.single("pdf"), uploadPdf);
+router.get("/study/all", getAllPdfs);
+router.get("/study/pdf/:id", getPdf);
+router.delete("/study/delete/:id", deletePdf);
 export default router;
