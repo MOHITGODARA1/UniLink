@@ -8,7 +8,7 @@ const LoginCheck = async (req, res) => {
 
     if (!Name || !Password) {
       return res.status(400).json({
-        message: "Fields are required",
+        message: "Email ans Password is required",
         success: false
       });
     }

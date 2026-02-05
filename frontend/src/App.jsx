@@ -23,9 +23,9 @@ export default function App() {
         <Route 
         path="/dashboard" 
         element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
             <DasbordPage />
-          </ProtectedRoute>
+          // </ProtectedRoute>
         } />
         <Route path="/Study-Resourse" element={<StudyResourse />} />
         <Route path="/Groups-Teams" element={<GroupTeam />} />

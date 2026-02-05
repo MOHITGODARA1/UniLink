@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-function HeroSection() {
+import { motion } from "framer-motion";
 
+function HeroSection() {
   const stats = [
     { value: "10K+", label: "Active Students" },
     { value: "500+", label: "Universities" },
@@ -9,51 +10,105 @@ function HeroSection() {
 
   return (
     <>
-      <section className="bg-black w-full h-auto pb-20 overflow-x-hidden flex flex-col items-center pt-20">
-
+      <section className="bg-black w-full min-h-screen flex flex-col items-center justify-center pt-24 pb-20 px-6 overflow-hidden">
+        
         {/* Tagline */}
-        <div>
-          <div className="bg-white/10 border border-gray-400 w-[350px] h-8 rounded-2xl flex justify-center items-center">
-            <p className="text-gray-200">● Empowering Student Connection</p>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-6"
+        >
+          <div className="bg-white/10 border border-white/20 px-5 py-1.5 rounded-full">
+            <p className="text-gray-200 text-sm tracking-wide">
+              ● Empowering Student Connections
+            </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Heading */}
-        <h1 className="text-6xl font-semibold mt-6 bg-linear-to-b from-white to-gray-400 text-transparent bg-clip-text text-center px-4">
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="
+            text-5xl md:text-6xl lg:text-7xl font-semibold
+            bg-linear-to-b from-white to-gray-400
+            text-transparent bg-clip-text
+            text-center
+          "
+        >
           The Platform for Students
-        </h1>
+        </motion.h1>
 
         {/* Subheading */}
-        <p className="text-gray-400 text-sm mt-4 text-center max-w-xl px-4">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+          className="text-gray-400 text-base md:text-lg mt-6 text-center max-w-2xl"
+        >
           Unilink is a powerful platform connecting university students to collaborate,
           share ideas, and build their future together.
-        </p>
+        </motion.p>
 
         {/* Buttons */}
-        <div className="flex gap-5 mt-13">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="flex gap-6 mt-12"
+        >
           <Link to="/Login">
-            <button className="w-35 h-10 rounded-lg bg-white text-black font-medium hover:scale-105 transition">
+            <button className="
+              px-7 py-2.5 rounded-xl bg-white text-black font-medium
+              hover:scale-105 hover:shadow-lg transition
+            ">
               Get Started
             </button>
           </Link>
-          <button className="w-35 h-10 rounded-lg border border-gray-500 text-white font-medium hover:scale-105 transition">
+
+          <button className="
+            px-7 py-2.5 rounded-xl border border-gray-500 text-white font-medium
+            hover:bg-white/5 hover:scale-105 transition
+          ">
             Join Community
           </button>
-        </div>
+        </motion.div>
 
         {/* Stats */}
-        <div className="flex gap-16 md:gap-20 mt-15 flex-wrap justify-center">
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.2, delayChildren: 0.6 },
+            },
+          }}
+          className="flex gap-14 md:gap-20 mt-20 flex-wrap justify-center"
+        >
           {stats.map((item, index) => (
-            <div key={index} className="text-center">
-              <p className="text-white text-4xl font-medium">{item.value}</p>
-              <p className="text-gray-400">{item.label}</p>
-            </div>
+            <motion.div
+              key={index}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0 },
+              }}
+              className="text-center"
+            >
+              <p className="text-white text-4xl md:text-5xl font-semibold">
+                {item.value}
+              </p>
+              <p className="text-gray-400 mt-1">{item.label}</p>
+            </motion.div>
           ))}
-        </div>
-
+        </motion.div>
       </section>
 
-      <div className="h-px w-full bg-gray-700"></div>
+      {/* Divider */}
+      <div className="h-px w-full bg-gray-700" />
     </>
   );
 }

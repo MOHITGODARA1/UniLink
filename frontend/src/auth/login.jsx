@@ -32,6 +32,10 @@ function Login() {
       localStorage.setItem("Userdata",response.data.user)
       navigate("/dashboard");
       console.log(response.data);
+      if (!res.ok) {
+        alert(data.message); 
+        return;
+      }
 
     } catch (error) {
       if (error.response) {
