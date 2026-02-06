@@ -8,14 +8,13 @@ function RightNavbar() {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("Token");
 
-  // ---------------- FETCH SUGGESTIONS ----------------
+  // FETCH SUGGESTIONS
   const fetchSuggestions = async () => {
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API}/Suggestion-User/${userId}`
       );
 
-      // Each user should have "isFollowing" based on logged-in user's following list
       const updated = res.data.map((u) => ({
         ...u,
         isFollowing: u.Followers?.includes(userId) || false,
@@ -31,7 +30,7 @@ function RightNavbar() {
     if (userId) fetchSuggestions();
   }, [userId]);
 
-  // ---------------- FOLLOW / UNFOLLOW ----------------
+  // FOLLOW / UNFOLLOW
   const handleFollow = async (targetUserId) => {
     try {
       const res = await axios.post(
@@ -40,9 +39,8 @@ function RightNavbar() {
         { headers: { authorization: token } }
       );
 
-      const followed = res.data.followed; // true = following, false = unfollowed
+      const followed = res.data.followed;
 
-      // Update UI instantly
       setSuggestedUsers((prev) =>
         prev.map((user) =>
           user._id === targetUserId
@@ -58,14 +56,19 @@ function RightNavbar() {
   return (
     <div
       className="
-        w-72 
+        hidden lg:block
+        w-72
         bg-[#0d0d0d]
-        border border-gray-800 
-        rounded-2xl 
-        shadow-xl 
-        p-6  
+        border border-gray-800
+        rounded-2xl
+        shadow-xl
+        p-6
         text-white
-        fixed right-6 top-24
+        fixed
+        right-6
+        top-24
+        max-h-[calc(100vh-120px)]
+        overflow-y-auto
       "
     >
       <h2 className="text-lg font-semibold text-gray-200 mb-4">
@@ -77,7 +80,11 @@ function RightNavbar() {
           <p className="text-gray-500 text-sm">No suggestions right now.</p>
         ) : (
           suggestedUsers.map((user) => (
-            <Link key={user._id} to={`/profile/${user._id}`} className="block">
+            <Link
+              key={user._id}
+              to={`/profile/${user._id}`}
+              className="block"
+            >
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-gray-700 hover:bg-white/10 transition">
 
                 {/* Avatar */}
@@ -87,13 +94,17 @@ function RightNavbar() {
                   alt="User"
                 />
 
-                {/* Username + College */}
+                {/* USER INFO */}
                 <div className="flex-1 overflow-hidden">
-                  <p className="text-sm font-semibold truncate">{user.UserName}</p>
-                  <p className="text-xs text-gray-400 truncate">{user.Collage}</p>
+                  <p className="text-sm font-semibold truncate">
+                    {user.UserName}
+                  </p>
+                  <p className="text-xs text-gray-400 truncate">
+                    {user.Collage}
+                  </p>
                 </div>
 
-                {/* Follow / Following Button */}
+                {/* FOLLOW BUTTON */}
                 <button
                   className={`px-3 py-1 text-xs rounded-lg transition shrink-0 ml-auto
                     ${
@@ -103,7 +114,7 @@ function RightNavbar() {
                     }
                   `}
                   onClick={(e) => {
-                    e.preventDefault(); // stop navigation
+                    e.preventDefault();
                     handleFollow(user._id);
                   }}
                 >

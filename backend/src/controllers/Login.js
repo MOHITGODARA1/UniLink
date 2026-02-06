@@ -8,7 +8,7 @@ const LoginCheck = async (req, res) => {
 
     if (!Name || !Password) {
       return res.status(400).json({
-        message: "Email ans Password is required",
+        message: "Email and Password are required",
         success: false
       });
     }
@@ -41,7 +41,7 @@ const LoginCheck = async (req, res) => {
 
     return res.status(200).json({
       message: "Login successful",
-      data: user,
+      user: user,  // Changed from 'data' to 'user' to match frontend
       token,
       success: true
     });

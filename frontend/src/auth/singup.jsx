@@ -5,46 +5,44 @@ import Axios from "axios";
 function SignUp() {
   const [UserName, SetUsername] = useState("");
   const [Email, SetEmail] = useState("");
-  const [Collage, setCollage] = useState(""); // only the name
+  const [Collage, setCollage] = useState("");
   const [Password, setPassword] = useState("");
   const [ConfirmPassword, setConfirmPassword] = useState("");
   const [Agree, setAgree] = useState(false);
   const [Errors, setErrors] = useState({});
-  const [Suggestions, setSuggestions] = useState([]); // array of objects {name,state,city}
+  const [Suggestions, setSuggestions] = useState([]);
 
   const navigate = useNavigate();
 
-  // 🔎 Search college from backend API
+  // 🔍 SEARCH UNIVERSITY
   const searchCollege = async (value) => {
     setCollage(value);
-
     if (value.length < 2) {
       setSuggestions([]);
       return;
     }
-
     try {
       const res = await Axios.get(
         `${import.meta.env.VITE_API}/Search?query=${value}`
       );
       setSuggestions(res.data);
-    } catch (error) {
+    } catch {
       setSuggestions([]);
-      console.error(error);
     }
   };
 
+  // 🧾 REGISTER
   const registerUser = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
-
     if (!UserName.trim()) newErrors.UserName = "Username is required!";
     if (!Email.trim()) newErrors.Email = "Email is required!";
     if (!Collage.trim()) newErrors.Collage = "University is required!";
     if (!Password.trim()) newErrors.Password = "Password is required!";
-    if (!ConfirmPassword.trim()) newErrors.ConfirmPassword = "Confirm Password is required!";
-    if (Password && ConfirmPassword && Password !== ConfirmPassword)
+    if (!ConfirmPassword.trim())
+      newErrors.ConfirmPassword = "Confirm Password is required!";
+    if (Password !== ConfirmPassword)
       newErrors.ConfirmPassword = "Passwords do not match!";
     if (!Agree) newErrors.Agree = "You must accept Terms & Services.";
 
@@ -56,203 +54,230 @@ function SignUp() {
     setErrors({});
 
     try {
-      const data = { UserName, Email, Collage, Password };
-
-      await Axios.post(`${import.meta.env.VITE_API}/user-Register`, data);
-      localStorage.setItem("UserName", UserName);
+      await Axios.post(`${import.meta.env.VITE_API}/user-Register`, {
+        UserName,
+        Email,
+        Collage,
+        Password,
+      });
       navigate("/Skill-Select");
-
-      // Clear fields
-      SetUsername("");
-      SetEmail("");
-      setCollage("");
-      setPassword("");
-      setConfirmPassword("");
-      setAgree(false);
-      setSuggestions([]);
-
     } catch (error) {
-      if (error.response?.data) {
-        const serverError = error.response.data;
-        let updatedErrors = {};
-
-        if (serverError.field === "email") {
-          updatedErrors.Email = "Email already exists!";
-        }
-        if (serverError.field === "username") {
-          updatedErrors.UserName = "Username is already taken!";
-        }
-        if (!serverError.field) {
-          updatedErrors.general = serverError.message || "Something went wrong";
-        }
-
-        setErrors(updatedErrors);
-      }
+      setErrors({
+        general: error.response?.data?.message || "Something went wrong",
+      });
     }
   };
 
   return (
-    <>
-      <div className="w-full min-h-screen bg-black flex justify-center items-center px-6 overflow-hidden relative">
-        <Link
-          to="/"
-          className="absolute top-6 left-6 text-gray-400 hover:text-white transition flex items-center gap-2"
-        >
-          <i className="ri-arrow-left-line"></i>
-          <span>Home</span>
-        </Link>
+    <div className="w-full min-h-screen bg-black flex justify-center items-center px-4">
 
-        <div className="
-          w-[95%] max-w-5xl 
-          bg-white/10 backdrop-blur-xl 
-          border border-white/20 
-          rounded-3xl shadow-xl 
+      {/* BACK */}
+      <Link
+        to="/"
+        className="absolute top-5 left-5 text-gray-400 hover:text-white flex items-center gap-2 text-sm"
+      >
+        <i className="ri-arrow-left-line"></i> Home
+      </Link>
+
+      {/* MAIN CARD */}
+      <div
+        className="
+          w-full max-w-5xl
+          bg-white/10 backdrop-blur-xl
+          border border-white/20
+          rounded-3xl shadow-xl
           grid grid-cols-1 md:grid-cols-[40%_60%]
           overflow-hidden
-        ">
+        "
+      >
+        {/* LEFT — DESKTOP ONLY */}
+        <div className="hidden md:flex flex-col justify-center items-center text-center p-10 bg-white/5 border-r border-gray-700">
+          <img src="./logo.png" alt="logo" className="h-28 mb-6" />
+          <h1 className="text-4xl font-bold bg-linear-to-b from-white to-gray-400 text-transparent bg-clip-text">
+            Join Unilink
+          </h1>
+          <p className="text-gray-300 text-lg mt-4 px-4">
+            Create your account and connect with students worldwide.
+          </p>
+        </div>
 
-          {/* LEFT SIDE */}
-          <div className="flex flex-col justify-center items-center text-center p-10 bg-white/5 border-r border-gray-700">
-            <img src="./logo.png" alt="logo" className="h-32 mb-6 drop-shadow-xl" />
+        {/* RIGHT — FORM */}
+        <form
+          onSubmit={registerUser}
+          className="flex flex-col justify-center p-6 sm:p-10"
+        >
+          {/* MOBILE LOGO */}
+          <img src="./logo.png" alt="logo" className="h-12 mx-auto mb-6 md:hidden" />
 
-            <h1 className="text-4xl font-bold bg-linear-to-b from-white to-gray-400 text-transparent bg-clip-text">
-              Join Unilink
-            </h1>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-white mb-6 text-center md:text-left">
+            Create Account
+          </h2>
 
-            <p className="text-gray-300 text-lg mt-4 leading-relaxed px-4">
-              Create your Unilink account and start connecting with students across the world.
-            </p>
-          </div>
+          {Errors.general && (
+            <p className="text-red-500 text-sm mb-3">{Errors.general}</p>
+          )}
 
-          {/* RIGHT SIDE */}
-          <div className="flex flex-col justify-center p-10">
-            <h2 className="text-3xl font-semibold text-white mb-6">Create Account</h2>
-
-            {Errors.general && (
-              <p className="text-red-500 text-sm mb-3">{Errors.general}</p>
-            )}
-
-            {/* USERNAME + EMAIL */}
-            <div className="flex flex-col md:flex-row gap-5">
-              <div className="flex-1">
-                <label className="text-gray-300 text-sm ml-1">Username</label>
-                <input
-                  type="text"
-                  value={UserName}
-                  onChange={(e) => SetUsername(e.target.value)}
-                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
-                  placeholder="Enter username"
-                />
-                {Errors.UserName && <p className="text-red-500 text-sm mt-1">{Errors.UserName}</p>}
-              </div>
-
-              <div className="flex-1">
-                <label className="text-gray-300 text-sm ml-1">Email</label>
-                <input
-                  type="email"
-                  value={Email}
-                  onChange={(e) => SetEmail(e.target.value)}
-                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
-                  placeholder="Enter email"
-                />
-                {Errors.Email && <p className="text-red-500 text-sm mt-1">{Errors.Email}</p>}
-              </div>
-            </div>
-
-            {/* UNIVERSITY WITH AUTOCOMPLETE */}
-            <div className="mt-5 relative">
-              <label className="text-gray-300 text-sm ml-1">University</label>
-
+          {/* INPUT STYLE */}
+          {[
+            {
+              label: "Username",
+              value: UserName,
+              setter: SetUsername,
+              error: Errors.UserName,
+              placeholder: "Enter username",
+            },
+            {
+              label: "Email",
+              value: Email,
+              setter: SetEmail,
+              error: Errors.Email,
+              placeholder: "Enter email",
+            },
+          ].map((field, i) => (
+            <div key={i} className="mb-4">
+              <label className="text-gray-200 text-sm font-medium">
+                {field.label}
+              </label>
               <input
                 type="text"
-                value={Collage}
-                onChange={(e) => searchCollege(e.target.value)}
-                className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
-                placeholder="Enter your university"
+                value={field.value}
+                onChange={(e) => field.setter(e.target.value)}
+                placeholder={field.placeholder}
+                className="
+                  w-full mt-2 px-4 py-4 text-base
+                  bg-black/40 border border-gray-600
+                  rounded-xl text-white
+                  placeholder-gray-400
+                  outline-none focus:outline-none
+                  focus:border-blue-500 focus:bg-black/60
+                  transition
+                "
               />
-
-              {/* Suggestions Dropdown */}
-              {Suggestions.length > 0 && (
-                <ul className="absolute z-50 w-full bg-white/90 text-black rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto border border-gray-300">
-                  {Suggestions.map((item, index) => (
-                    <li
-                      key={index}
-                      onClick={() => {
-                        setCollage(item.name); // only the name goes into input
-                        setSuggestions([]);
-                      }}
-                      className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                    >
-                      <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {item.city}, {item.state}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+              {field.error && (
+                <p className="text-red-500 text-sm mt-1">{field.error}</p>
               )}
-
-              {Errors.Collage && <p className="text-red-500 text-sm mt-1">{Errors.Collage}</p>}
             </div>
+          ))}
 
-            {/* PASSWORD + CONFIRM */}
-            <div className="flex flex-col md:flex-row gap-5 mt-5">
-              <div className="flex-1">
-                <label className="text-gray-300 text-sm ml-1">Password</label>
-                <input
-                  type="password"
-                  value={Password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
-                  placeholder="Create password"
-                />
-                {Errors.Password && <p className="text-red-500 text-sm mt-1">{Errors.Password}</p>}
-              </div>
-
-              <div className="flex-1">
-                <label className="text-gray-300 text-sm ml-1">Confirm Password</label>
-                <input
-                  type="password"
-                  value={ConfirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full mt-2 px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white outline-none focus:border-blue-400 focus:bg-white/10 transition"
-                  placeholder="Confirm password"
-                />
-                {Errors.ConfirmPassword && (
-                  <p className="text-red-500 text-sm mt-1">{Errors.ConfirmPassword}</p>
-                )}
-              </div>
-            </div>
-
-            {/* TERMS */}
-            <div className="flex items-center mt-6">
-              <input
-                type="checkbox"
-                checked={Agree}
-                onChange={(e) => setAgree(e.target.checked)}
-                className="mr-2 w-4 h-4"
-              />
-              <p className="text-gray-300 text-sm">
-                I agree to the{" "}
-                <span className="text-blue-400 cursor-pointer hover:underline">
-                  Terms & Services
-                </span>
-              </p>
-            </div>
-            {Errors.Agree && <p className="text-red-500 text-sm mt-1">{Errors.Agree}</p>}
-
-            {/* SUBMIT BUTTON */}
-            <button
-              className="w-full mt-8 py-3 h-12 bg-white text-black font-semibold rounded-xl shadow-md hover:bg-blue-400 hover:text-white hover:scale-[1.03] active:scale-95 transition duration-200"
-              onClick={(e) => registerUser(e)}
-            >
-              Create Account
-            </button>
-
+          {/* UNIVERSITY */}
+          <div className="mb-4 relative">
+            <label className="text-gray-200 text-sm font-medium">
+              University
+            </label>
+            <input
+              type="text"
+              value={Collage}
+              onChange={(e) => searchCollege(e.target.value)}
+              placeholder="Search university"
+              className="
+                w-full mt-2 px-4 py-4 text-base
+                bg-black/40 border border-gray-600
+                rounded-xl text-white
+                placeholder-gray-400
+                outline-none focus:outline-none
+                focus:border-blue-500 focus:bg-black/60
+                transition
+              "
+            />
+            {Suggestions.length > 0 && (
+              <ul className="absolute z-50 w-full bg-white text-black rounded-xl shadow-lg mt-1 max-h-52 overflow-y-auto">
+                {Suggestions.map((u, i) => (
+                  <li
+                    key={i}
+                    onClick={() => {
+                      setCollage(u.name);
+                      setSuggestions([]);
+                    }}
+                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                  >
+                    <p className="font-semibold">{u.name}</p>
+                    <p className="text-xs text-gray-600">
+                      {u.city}, {u.state}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {Errors.Collage && (
+              <p className="text-red-500 text-sm mt-1">{Errors.Collage}</p>
+            )}
           </div>
-        </div>
+
+          {/* PASSWORDS */}
+          {[{
+            label: "Password",
+            value: Password,
+            setter: setPassword,
+            error: Errors.Password,
+            placeholder: "Create password",
+          },
+          {
+            label: "Confirm Password",
+            value: ConfirmPassword,
+            setter: setConfirmPassword,
+            error: Errors.ConfirmPassword,
+            placeholder: "Confirm password",
+          }].map((field, i) => (
+            <div key={i} className="mb-4">
+              <label className="text-gray-200 text-sm font-medium">
+                {field.label}
+              </label>
+              <input
+                type="password"
+                value={field.value}
+                onChange={(e) => field.setter(e.target.value)}
+                placeholder={field.placeholder}
+                className="
+                  w-full mt-2 px-4 py-4 text-base
+                  bg-black/40 border border-gray-600
+                  rounded-xl text-white
+                  placeholder-gray-400
+                  outline-none focus:outline-none
+                  focus:border-blue-500 focus:bg-black/60
+                  transition
+                "
+              />
+              {field.error && (
+                <p className="text-red-500 text-sm mt-1">{field.error}</p>
+              )}
+            </div>
+          ))}
+
+          {/* TERMS */}
+          <div className="flex items-center mt-4">
+            <input
+              type="checkbox"
+              checked={Agree}
+              onChange={(e) => setAgree(e.target.checked)}
+              className="w-5 h-5 accent-blue-500"
+            />
+            <p className="text-gray-300 text-sm ml-2">
+              I agree to the{" "}
+              <span className="text-blue-400 hover:underline cursor-pointer">
+                Terms & Services
+              </span>
+            </p>
+          </div>
+          {Errors.Agree && (
+            <p className="text-red-500 text-sm mt-1">{Errors.Agree}</p>
+          )}
+
+          {/* SUBMIT */}
+          <button
+            type="submit"
+            className="
+              w-full mt-6 py-4 text-lg
+              bg-white text-black font-semibold
+              rounded-xl
+              hover:bg-blue-500 hover:text-white
+              transition
+            "
+          >
+            Create Account
+          </button>
+        </form>
       </div>
-    </>
+    </div>
   );
 }
 

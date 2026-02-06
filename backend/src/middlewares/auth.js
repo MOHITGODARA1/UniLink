@@ -1,6 +1,10 @@
 import JWT from "jsonwebtoken"
 
 const AuthJwt=async (req,res,next)=>{
+  if (req.method === "OPTIONS") {
+    return next();
+  }
+
   const token = req.headers.authorization;
   if(!token){
     return res.status(401).json({

@@ -34,33 +34,33 @@ function Feed() {
 
   useEffect(() => {
     fetchPosts();
-    const interval = setInterval(fetchPosts, 3000);
-    return () => clearInterval(interval);
   }, []);
 
   // ---------------------------------------------------
   // LIKE / UNLIKE POST
   // ---------------------------------------------------
   const toggleLike = async (postId) => {
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/toggle-like`, {
-        postId,
-        userId,
-      });
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_API}/toggle-like`, {
+      postId,
+      userId,
+    });
 
-      const updatedLikes = res.data.likesCount;
-
-      setPosts((prev) =>
-        prev.map((p) =>
-          p._id === postId
-            ? { ...p, liked: !p.liked, likes: new Array(updatedLikes) }
-            : p
-        )
-      );
-    } catch (err) {
-      console.log("Like Error:", err);
-    }
-  };
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === postId
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: res.data.likes, // backend should return full array
+            }
+          : p
+      )
+    );
+  } catch (err) {
+    console.log("Like Error:", err);
+  }
+};
 
   // ---------------------------------------------------
   // ADD COMMENT

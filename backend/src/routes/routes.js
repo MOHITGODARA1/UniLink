@@ -23,6 +23,7 @@ import UpdateProfile from "../controllers/updateProfile.controller.js";
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
+
 router.post("/user-Register", RegisterUser);
 router.post("/Login", LoginCheck);
 

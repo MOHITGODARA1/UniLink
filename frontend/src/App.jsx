@@ -1,32 +1,69 @@
 import { Routes, Route } from "react-router-dom";
-import LandingPage from "./Page/landing/landing.page";
-import Login from "./auth/login";
-import SignUp from "./auth/singup";
-import DasbordPage from "./Page/Dashbord/Dasbordpage";
-import ProtectedRoute from "./auth/Protector";
-import SkillSelect from "./auth/Skill.Select";
-import StudyResourse from "./Page/Dashbord/dashbordcomponent/Studyresourse/studyresourse";
-import GroupTeam from "./Page/Dashbord/dashbordcomponent/Groups";
-import Event from "./Page/Dashbord/dashbordcomponent/Events";
-import Message from "./Page/Dashbord/dashbordcomponent/Message";
-import Notification from "./Page/Dashbord/dashbordcomponent/notification";
-import Profile from "./Page/Dashbord/dashbordcomponent/ProfilePage";
-import ProfileView from "./components/Layout/Profile.view";
+import { lazy, Suspense } from "react";
+
+// LAZY IMPORTS
+const LandingPage = lazy(() => import("./Page/landing/landing.page"));
+const Login = lazy(() => import("./auth/login"));
+const SignUp = lazy(() => import("./auth/singup"));
+const SkillSelect = lazy(() => import("./auth/Skill.Select"));
+
+const DasbordPage = lazy(() =>
+  import("./Page/Dashbord/Dasbordpage")
+);
+
+const StudyResourse = lazy(() =>
+  import("./Page/Dashbord/dashbordcomponent/Studyresourse/studyresourse")
+);
+
+const GroupTeam = lazy(() =>
+  import("./Page/Dashbord/dashbordcomponent/Groups")
+);
+
+const Event = lazy(() =>
+  import("./Page/Dashbord/dashbordcomponent/Events")
+);
+
+const Message = lazy(() =>
+  import("./Page/Dashbord/dashbordcomponent/Message")
+);
+
+const Notification = lazy(() =>
+  import("./Page/Dashbord/dashbordcomponent/notification")
+);
+
+const Profile = lazy(() =>
+  import("./Page/Dashbord/dashbordcomponent/ProfilePage")
+);
+
+const ProfileView = lazy(() =>
+  import("./components/Layout/Profile.view")
+);
+
+// OPTIONAL: simple loader
+const Loader = () => (
+  <div className="h-screen flex items-center justify-center text-white">
+    Loading...
+  </div>
+);
+
 export default function App() {
   return (
-    <>
+    <Suspense fallback={<Loader />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/SignUp" element={<SignUp />} />
         <Route path="/Skill-Select" element={<SkillSelect />} />
-        <Route 
-        path="/dashboard" 
-        element={
-          // <ProtectedRoute>
+
+        <Route
+          path="/dashboard"
+          element={
+            // <ProtectedRoute>
             <DasbordPage />
-          // </ProtectedRoute>
-        } />
+            // </ProtectedRoute>
+          }
+        />
+
         <Route path="/Study-Resourse" element={<StudyResourse />} />
         <Route path="/Groups-Teams" element={<GroupTeam />} />
         <Route path="/Event" element={<Event />} />
@@ -34,8 +71,7 @@ export default function App() {
         <Route path="/notification" element={<Notification />} />
         <Route path="/Profile" element={<Profile />} />
         <Route path="/profile/:id" element={<ProfileView />} />
-
       </Routes>
-    </>
+    </Suspense>
   );
 }
