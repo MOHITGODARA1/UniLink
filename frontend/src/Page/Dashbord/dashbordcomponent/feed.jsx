@@ -7,14 +7,12 @@ import { IoShareOutline } from "react-icons/io5";
 function Feed() {
   const [posts, setPosts] = useState([]);
   const [commentText, setCommentText] = useState({});
-  const [showComments, setShowComments] = useState({}); // store visibility for each post
+  const [showComments, setShowComments] = useState({});
 
   const userId = localStorage.getItem("userId");
   const Collage = localStorage.getItem("userCollage");
 
-  // ---------------------------------------------------
   // FETCH POSTS
-  // ---------------------------------------------------
   const fetchPosts = async () => {
     try {
       const res = await axios.get(
@@ -36,35 +34,27 @@ function Feed() {
     fetchPosts();
   }, []);
 
-  // ---------------------------------------------------
-  // LIKE / UNLIKE POST
-  // ---------------------------------------------------
+  // LIKE / UNLIKE
   const toggleLike = async (postId) => {
-  try {
-    const res = await axios.post(`${import.meta.env.VITE_API}/toggle-like`, {
-      postId,
-      userId,
-    });
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/toggle-like`, {
+        postId,
+        userId,
+      });
 
-    setPosts((prev) =>
-      prev.map((p) =>
-        p._id === postId
-          ? {
-              ...p,
-              liked: !p.liked,
-              likes: res.data.likes, // backend should return full array
-            }
-          : p
-      )
-    );
-  } catch (err) {
-    console.log("Like Error:", err);
-  }
-};
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === postId
+            ? { ...p, liked: !p.liked, likes: res.data.likes }
+            : p
+        )
+      );
+    } catch (err) {
+      console.log("Like Error:", err);
+    }
+  };
 
-  // ---------------------------------------------------
   // ADD COMMENT
-  // ---------------------------------------------------
   const addComment = async (postId) => {
     const text = commentText[postId];
     if (!text || !text.trim()) return;
@@ -88,147 +78,148 @@ function Feed() {
     }
   };
 
-  // ---------------------------------------------------
-  // TOGGLE COMMENTS VISIBILITY
-  // ---------------------------------------------------
+  // TOGGLE COMMENTS
   const toggleCommentsSection = (postId) => {
     setShowComments((prev) => ({
       ...prev,
-      [postId]: !prev[postId], // toggle
+      [postId]: !prev[postId],
     }));
   };
 
   return (
-    <div>
+    <div className="bg-white">
       {posts.map((post) => (
-        <div
-          key={post._id}
-          className="bg-[#0d0d0d] border border-gray-800 rounded-2xl p-6 mb-6 shadow-xl"
-        >
-          {/* HEADER */}
-          <div className="flex items-center gap-3">
-            <img
-              src={post.authorId?.ProfilePic || "/Profile.photo.5.jpg"}
-              className="w-12 h-12 rounded-full object-cover border border-gray-700"
-            />
+        <div key={post._id}>
 
-            <div>
-              <p className="text-white font-semibold">
-                {post.authorId?.UserName}
-              </p>
-              <p className="text-xs text-gray-400">
-                {new Date(post.createdAt).toLocaleString()}
-              </p>
-            </div>
-          </div>
-
-          <div className="border-b border-gray-800 my-3"></div>
-
-          {/* TEXT CONTENT */}
-          {post.content && (
-            <p className="text-gray-300 whitespace-pre-line leading-relaxed mb-4">
-              {post.content}
-            </p>
-          )}
-
-          {/* MEDIA CONTENT */}
-          {post.mediaUrl && post.mediaType !== "none" && (
-            <div className="border border-gray-700 rounded-xl bg-black mb-4 h-72 flex items-center justify-center overflow-hidden">
-              {post.mediaType === "video" ? (
-                <video
-                  src={post.mediaUrl}
-                  controls
-                  className="max-h-full max-w-full object-contain rounded-xl"
-                />
-              ) : (
-                <img
-                  src={post.mediaUrl}
-                  alt="media"
-                  className="max-h-full max-w-full object-contain rounded-xl"
-                />
-              )}
-            </div>
-          )}
-
-          <div className="border-b border-gray-800 mt-4"></div>
-
-          {/* ACTION BUTTONS */}
-          <div className="flex justify-around text-gray-300 mt-4 text-sm">
-            <button
-              onClick={() => toggleLike(post._id)}
-              className="flex items-center gap-2"
-            >
-              {post.liked ? (
-                <AiFillLike className="text-blue-500" />
-              ) : (
-                <AiOutlineLike />
-              )}
-              {post.likes?.length || 0} Like
-            </button>
-
-            {/* COMMENT BUTTON: toggles visibility */}
-            <button
-              onClick={() => toggleCommentsSection(post._id)}
-              className="flex items-center gap-2"
-            >
-              <FaRegCommentDots />
-              Comment
-            </button>
-
-            <button className="flex items-center gap-2">
-              <IoShareOutline /> Share
-            </button>
-          </div>
-
-          {/* COMMENT SECTION - ONLY SHOW WHEN CLICKED */}
-          {showComments[post._id] && (
-            <div className="mt-4">
-
-              {/* COMMENT INPUT + POST BUTTON */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Write a comment..."
-                  value={commentText[post._id] || ""}
-                  onChange={(e) =>
-                    setCommentText((prev) => ({
-                      ...prev,
-                      [post._id]: e.target.value,
-                    }))
-                  }
-                  className="flex-1 p-2 rounded bg-[#1a1a1a] text-white border border-gray-700"
-                />
-
-                <button
-                  onClick={() => addComment(post._id)}
-                  className="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700"
-                >
-                  Post
-                </button>
+          {/* POST CONTAINER */}
+          <div
+            className="
+              w-full
+              bg-white
+              px-4 py-4
+              md:p-5
+              md:mb-6
+              md:border md:border-gray-200
+              md:rounded-xl
+              md:shadow-sm
+            "
+          >
+            {/* HEADER */}
+            <div className="flex items-center gap-3">
+              <img
+                src={post.authorId?.ProfilePic || "/Profile.photo.5.jpg"}
+                alt="User"
+                className="w-10 h-10 rounded-full border border-gray-300 object-cover"
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {post.authorId?.UserName}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {new Date(post.createdAt).toLocaleString()}
+                </p>
               </div>
-
-              {/* SHOW ALL COMMENTS */}
-              {post.comments?.length > 0 && (
-                <div className="mt-4">
-                  {post.comments.map((c) => (
-                    <div key={c._id} className="flex items-start gap-2 mb-3">
-                      <img
-                        src={c.userId?.ProfilePic || "/Profile.photo.5.jpg"}
-                        className="w-8 h-8 rounded-full"
-                      />
-
-                      <div className="bg-[#1f1f1f] p-2 rounded-xl text-gray-300">
-                        <p className="font-semibold text-sm">
-                          {c.userId?.UserName}
-                        </p>
-                        <p className="text-sm">{c.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
-          )}
+
+            {/* LINE BETWEEN PROFILE & CONTENT */}
+            <div className="border-b border-gray-200 my-3" />
+
+            {/* TEXT CONTENT */}
+            {post.content && (
+              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                {post.content}
+              </p>
+            )}
+
+            {/* MEDIA */}
+            {post.mediaUrl && post.mediaType !== "none" && (
+              <div className="mt-3 border border-gray-200 overflow-hidden bg-gray-50 md:rounded-md">
+                {post.mediaType === "video" ? (
+                  <video
+                    src={post.mediaUrl}
+                    controls
+                    className="w-full max-h-[420px] object-contain"
+                  />
+                ) : (
+                  <img
+                    src={post.mediaUrl}
+                    alt="media"
+                    className="w-full max-h-[420px] object-contain"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* ACTIONS */}
+            <div className="flex justify-around mt-3 pt-3 border-t border-gray-200 text-sm text-gray-600">
+              <button
+                onClick={() => toggleLike(post._id)}
+                className={`flex items-center gap-2 ${
+                  post.liked ? "text-blue-600" : ""
+                }`}
+              >
+                {post.liked ? <AiFillLike /> : <AiOutlineLike />}
+                {post.likes?.length || 0}
+              </button>
+
+              <button
+                onClick={() => toggleCommentsSection(post._id)}
+                className="flex items-center gap-2"
+              >
+                <FaRegCommentDots />
+                Comment
+              </button>
+
+              <button className="flex items-center gap-2">
+                <IoShareOutline />
+                Share
+              </button>
+            </div>
+
+            {/* COMMENTS */}
+            {showComments[post._id] && (
+              <div className="mt-3 space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentText[post._id] || ""}
+                    onChange={(e) =>
+                      setCommentText((prev) => ({
+                        ...prev,
+                        [post._id]: e.target.value,
+                      }))
+                    }
+                    className="flex-1 p-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    onClick={() => addComment(post._id)}
+                    className="bg-blue-600 text-white px-4 rounded-lg text-sm"
+                  >
+                    Post
+                  </button>
+                </div>
+
+                {post.comments?.map((c) => (
+                  <div key={c._id} className="flex gap-2">
+                    <img
+                      src={c.userId?.ProfilePic || "/Profile.photo.5.jpg"}
+                      className="w-8 h-8 rounded-full border border-gray-300"
+                    />
+                    <div className="bg-gray-100 rounded-lg px-3 py-2">
+                      <p className="text-xs font-semibold text-gray-900">
+                        {c.userId?.UserName}
+                      </p>
+                      <p className="text-sm text-gray-700">{c.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* MOBILE POST DIVIDER (CONTINUOUS FEED) */}
+          <div className="md:hidden border-b border-gray-200" />
         </div>
       ))}
     </div>

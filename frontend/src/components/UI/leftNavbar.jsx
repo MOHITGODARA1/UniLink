@@ -30,7 +30,7 @@ function UniLinkSidebar() {
 
   if (!user) {
     return (
-      <div className="text-gray-300 p-4 bg-[#0d0d0d] rounded-xl border border-gray-800">
+      <div className="hidden md:block w-64 bg-white border border-gray-200 rounded-xl p-6 text-gray-500 text-sm">
         Loading...
       </div>
     );
@@ -42,80 +42,104 @@ function UniLinkSidebar() {
   return (
     <div
       className="
-        w-full md:w-64
-        h-full md:h-auto
-        bg-[#0d0d0d]
-        border border-gray-800
-        rounded-none md:rounded-2xl
-        shadow-xl
-        p-5 md:p-6
-        text-white
-        overflow-y-auto
+        hidden md:block
+        w-72
+        bg-white
+        border border-gray-200
+        rounded-xl
+        text-black
+        overflow-hidden
       "
     >
+      {/* TOP BLUE STRIP (50%) */}
+      <div className="h-20 bg-blue-600"></div>
+
       {/* PROFILE */}
-      <div className="flex flex-col items-center">
+      <div className="relative px-6 pb-6 text-center">
+        {/* AVATAR */}
         <img
           src={user.ProfilePic || "/Profile.photo.5.jpg"}
           alt="Profile"
           className="
-            w-16 h-16 md:w-20 md:h-20
-            rounded-full object-cover
-            border-2 border-blue-500
-            shadow-md
+            w-20 h-20
+            rounded-full
+            object-cover
+            border-4 border-white
+            mx-auto
+            -mt-10
+            bg-white
           "
         />
 
-        <h2 className="text-base md:text-lg font-semibold mt-3">
+        <h2 className="mt-3 text-base font-semibold">
           {user.UserName}
         </h2>
 
-        <p className="text-gray-400 text-xs md:text-sm">
+        <p className="text-sm text-gray-600">
           {user.Email}
         </p>
 
-        <p className="text-blue-400 text-xs mt-1">
+        <p className="text-xs text-gray-500 mt-1">
           {user.Collage}
         </p>
+      </div>
 
-        {/* BIO */}
-        <p className="text-gray-400 text-xs mt-3 text-center px-2">
+      {/* LINE */}
+      <div className="border-t border-gray-200"></div>
+
+      {/* BIO SECTION */}
+      <div className="px-6 py-4 bg-gray-50 text-center">
+        <p className="text-sm text-gray-700 leading-relaxed">
           {user.Bio || "No bio added."}
         </p>
       </div>
 
-      <div className="border-b border-gray-800 my-4"></div>
+      {/* LINE */}
+      <div className="border-t border-gray-200"></div>
 
       {/* SKILLS */}
-      <div>
-        <h3 className="text-gray-300 text-xs font-semibold mb-2">
+      <div className="p-6">
+        <h3 className="text-sm font-semibold mb-3">
           Skills
         </h3>
 
         <div className="flex flex-wrap gap-2">
           {visibleSkills.length ? (
-            visibleSkills.map((s, i) => (
+            visibleSkills.map((skill, i) => (
               <span
                 key={i}
                 className="
-                  px-2 md:px-3
-                  py-1
+                  px-3 py-1
                   text-xs
                   rounded-full
-                  border border-gray-700
-                  bg-white/5
-                  text-blue-300
+                  border border-gray-300
+                  bg-white
+                  text-gray-800
                 "
               >
-                {s}
+                {skill}
               </span>
             ))
           ) : (
-            <p className="text-gray-500 text-xs">No skills added.</p>
+            <p className="text-sm text-gray-500">
+              No skills added.
+            </p>
           )}
 
           {hasMoreSkills && (
-            <span className="px-3 py-1 text-xs rounded-full border border-gray-700 bg-white/5 text-gray-300 cursor-pointer">
+            <span
+              className="
+                px-3 py-1
+                text-xs
+                rounded-full
+                border border-blue-500
+                bg-blue-50
+                text-blue-700
+                cursor-pointer
+                hover:bg-blue-100
+                transition
+              "
+            >
               +{user.Skill.length - 8} more
             </span>
           )}

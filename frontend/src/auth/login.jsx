@@ -6,175 +6,192 @@ function Login() {
   const [Name, setName] = useState("");
   const [Password, setPassword] = useState("");
   const [Errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const LoginCheck = async () => {
-    let newErrors = {};
+  const LoginCheck = async (e) => {
+    e.preventDefault();
 
-    if (!Name.trim()) newErrors.Name = "Email or Username is required!";
-    if (!Password.trim()) newErrors.Password = "Password is required!";
+    let newErrors = {};
+    if (!Name.trim()) newErrors.Name = "Email or Username is required";
+    if (!Password.trim()) newErrors.Password = "Password is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    setErrors({});
-
     try {
+      setLoading(true);
+      setErrors({});
+
       const response = await Axios.post(
         `${import.meta.env.VITE_API}/Login`,
         { Name, Password },
         { withCredentials: true }
       );
 
-      localStorage.setItem("Token", response.data.token);
+      localStorage.setItem("Userdata", JSON.stringify(response.data.user));
       navigate("/dashboard");
     } catch (error) {
       setErrors({
-        server: error.response?.data?.message || "Something went wrong",
+        server: error.response?.data?.message || "Invalid credentials",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-black flex justify-center items-center px-4">
+    <div className="w-full min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden border border-gray-200">
 
-      {/* BACK BUTTON */}
-      <Link
-        to="/"
-        className="absolute top-5 left-5 text-gray-400 hover:text-white transition flex items-center gap-2 text-sm"
-      >
-        <i className="ri-arrow-left-line"></i>
-        Home
-      </Link>
-
-      {/* MAIN BOX */}
-      <div
-        className="
-          w-full max-w-5xl
-          bg-white/10 backdrop-blur-xl
-          border border-white/20
-          rounded-3xl shadow-xl
-          grid grid-cols-1 md:grid-cols-2
-          overflow-hidden
-        "
-      >
-        {/* LEFT SIDE — HIDDEN ON MOBILE */}
-        <div className="hidden md:flex flex-col justify-center items-center text-center p-10 bg-white/5 border-r border-gray-700">
-          <img
-            src="./logo.png"
-            alt="logo"
-            className="h-28 mb-6"
-          />
-
-          <h1 className="text-4xl font-bold bg-linear-to-b from-white to-gray-300 text-transparent bg-clip-text">
-            Welcome Back!
+        {/* LEFT */}
+        <div className="hidden md:flex flex-col justify-center px-14 bg-gray-100 border-r border-gray-200">
+          <h1 className="text-4xl font-semibold text-gray-900 leading-tight">
+            Connect with <br />
+            students from your <br />
+            <span className="text-gray-600 font-medium">
+              university.
+            </span>
           </h1>
-
-          <p className="text-gray-300 text-lg mt-4 px-4">
-            Login to your Unilink account and continue connecting with students.
+          <p className="mt-6 text-gray-600 text-sm leading-relaxed">
+            UniLink helps verified university students connect,
+            collaborate, and share ideas securely.
           </p>
         </div>
 
-        {/* RIGHT SIDE — FORM */}
-        <div className="flex flex-col justify-center p-6 sm:p-10">
-          {/* MOBILE LOGO */}
-          <img
-            src="./logo.png"
-            alt="logo"
-            className="h-12 mx-auto mb-6 md:hidden"
-          />
+        {/* RIGHT */}
+        <div className="flex flex-col justify-center px-6 sm:px-12 py-12">
 
-          <h2 className="text-2xl sm:text-3xl font-semibold text-white mb-6 text-center md:text-left">
-            Login
+          {/* MOBILE APP TITLE */}
+          <div className="md:hidden mb-6 text-center">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Uni<span className="font-light">Link</span>
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Connect with your university community
+            </p>
+          </div>
+
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Welcome back 👋
           </h2>
 
-          {/* USERNAME */}
-          <label className="text-gray-300 text-sm">Email or Username</label>
-          <input
-            type="text"
-            className="
-              w-full mt-2 px-4 py-3
-              bg-white/5 border border-gray-700
-              rounded-xl text-white
-              outline-none
-              focus:border-blue-400 focus:bg-white/10
-              transition
-            "
-            placeholder="Enter email or username"
-            value={Name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {Errors.Name && <p className="text-red-500 text-sm mt-1">{Errors.Name}</p>}
+          <form onSubmit={LoginCheck} className="space-y-4">
+            {/* EMAIL */}
+            <div>
+              <input
+                type="text"
+                placeholder="University email or username"
+                value={Name}
+                onChange={(e) => setName(e.target.value)}
+                className="
+                  w-full px-4 py-3 rounded-lg
+                  bg-gray-50
+                  border border-gray-300
+                  text-gray-800
+                  placeholder-gray-400
+                  text-sm
+                  outline-none
+                  focus:border-blue-600
+                "
+              />
+              {Errors.Name && (
+                <p className="text-red-500 text-xs mt-1">{Errors.Name}</p>
+              )}
+            </div>
 
-          {/* PASSWORD */}
-          <label className="text-gray-300 text-sm mt-5">Password</label>
-          <input
-            type="password"
-            className="
-              w-full mt-2 px-4 py-3
-              bg-white/5 border border-gray-700
-              rounded-xl text-white
-              outline-none
-              focus:border-blue-400 focus:bg-white/10
-              transition
-            "
-            placeholder="Enter password"
-            value={Password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {Errors.Password && (
-            <p className="text-red-500 text-sm mt-1">{Errors.Password}</p>
-          )}
+            {/* PASSWORD */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={Password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="
+                  w-full px-4 py-3 rounded-lg
+                  bg-gray-50
+                  border border-gray-300
+                  text-gray-800
+                  placeholder-gray-400
+                  text-sm
+                  outline-none
+                  focus:border-blue-600
+                "
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-xs text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+              {Errors.Password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {Errors.Password}
+                </p>
+              )}
+            </div>
 
-          {/* SERVER ERROR */}
-          {Errors.server && (
-            <p className="text-red-500 text-sm mt-4">{Errors.server}</p>
-          )}
+            {/* FORGOT */}
+            <div className="text-right">
+              <span className="text-xs text-gray-500 hover:underline cursor-pointer">
+                Forgot password?
+              </span>
+            </div>
 
-          {/* LOGIN BUTTON */}
-          <button
-            onClick={LoginCheck}
-            className="
-              w-full mt-6 py-3
-              bg-white text-black font-semibold
-              rounded-xl
-              hover:bg-blue-400 hover:text-white
-              transition
-            "
-          >
-            Login
-          </button>
+            {/* SERVER ERROR */}
+            {Errors.server && (
+              <p className="text-red-500 text-sm">{Errors.server}</p>
+            )}
+
+            {/* LOGIN BUTTON */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 rounded-lg font-medium transition ${
+                loading
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+            >
+              {loading ? "Logging in..." : "Log in"}
+            </button>
+          </form>
 
           {/* DIVIDER */}
           <div className="flex items-center my-6">
-            <div className="flex-1 h-px bg-gray-700"></div>
-            <span className="px-3 text-gray-400 text-sm">OR</span>
-            <div className="flex-1 h-px bg-gray-700"></div>
+            <div className="flex-1 h-px bg-gray-300"></div>
+            <span className="px-3 text-gray-400 text-xs">OR</span>
+            <div className="flex-1 h-px bg-gray-300"></div>
           </div>
 
-          {/* GOOGLE LOGIN */}
+          {/* EMAIL LOGIN */}
           <button
+            disabled
             className="
-              w-full py-3
-              border border-gray-600 text-white
-              rounded-xl
-              flex justify-center items-center gap-2
-              hover:bg-white/10
-              transition
+              w-full py-3 rounded-lg
+              bg-gray-100
+              border border-gray-300
+              text-gray-400
+              cursor-not-allowed
             "
           >
-            <i className="ri-google-fill text-xl text-red-400"></i>
-            Login with Google
+            Log in with University Email
           </button>
 
           {/* SIGN UP */}
-          <p className="text-center text-gray-400 mt-6 text-sm">
+          <p className="text-center text-sm text-gray-500 mt-6">
             Don’t have an account?{" "}
-            <Link to="/SignUp" className="text-blue-400 hover:underline">
-              Sign Up
+            <Link to="/SignUp" className="text-blue-600 hover:underline">
+              Create new account
             </Link>
+          </p>
+
+          <p className="text-center text-xs text-gray-400 mt-8">
+            © UniLink
           </p>
         </div>
       </div>

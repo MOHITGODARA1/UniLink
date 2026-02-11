@@ -50,8 +50,8 @@ export default function App() {
   return (
     <Suspense fallback={<Loader />}>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
+        {/* <Route path="/" element={<LandingPage />} /> */}
+        <Route path="/" element={<Login />} />
         <Route path="/SignUp" element={<SignUp />} />
         <Route path="/Skill-Select" element={<SkillSelect />} />
 

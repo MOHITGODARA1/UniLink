@@ -16,7 +16,7 @@ const Feed = lazy(() =>
 );
 
 const Loader = ({ text }) => (
-  <div className="text-gray-400 py-4 text-center">
+  <div className="text-gray-400 py-6 text-center text-sm">
     {text || "Loading..."}
   </div>
 );
@@ -26,9 +26,10 @@ function DasbordPage() {
 
   return (
     <>
+      {/* TOP NAVBAR */}
       <UpperNavbar />
 
-      {/* MOBILE LEFT SIDEBAR (ONLY VIA DRAWER) */}
+      {/* MOBILE LEFT SIDEBAR DRAWER */}
       <div
         className={`
           fixed inset-0 z-40 md:hidden
@@ -39,7 +40,7 @@ function DasbordPage() {
         <div
           onClick={() => setOpen(false)}
           className={`
-            absolute inset-0 bg-black/50
+            absolute inset-0 bg-black/40
             transition-opacity
             ${open ? "opacity-100" : "opacity-0"}
           `}
@@ -49,7 +50,8 @@ function DasbordPage() {
           className={`
             absolute top-0 left-0
             h-full w-[260px]
-            bg-black
+            bg-white
+            border-r border-gray-200
             p-4
             transition-transform duration-300
             ${open ? "translate-x-0" : "-translate-x-full"}
@@ -61,44 +63,56 @@ function DasbordPage() {
         </div>
       </div>
 
-      {/* PAGE */}
-      <div className="w-full min-h-screen bg-black flex justify-center">
+      {/* PAGE LAYOUT */}
+      <div className="w-full min-h-screen bg-gray-50 pt-5 sm:pt-24">
 
-        {/* LEFT SIDEBAR — DESKTOP ONLY */}
-        <div className="hidden md:block fixed top-24 left-6 z-30">
-          <Suspense fallback={<Loader text="Loading menu..." />}>
-            <UniLinkSidebar />
-          </Suspense>
-        </div>
+        <div className="relative max-w-[1400px] mx-auto flex justify-center">
 
-        {/* RIGHT SIDEBAR — DESKTOP ONLY */}
-        <div className="hidden lg:block fixed top-24 right-6 z-30">
-          <Suspense fallback={null}>
-            <RightNavbar />
-          </Suspense>
-        </div>
+          {/* LEFT SIDEBAR — DESKTOP */}
+          <div className="hidden md:block fixed top-24 left-4 lg:left-6 z-30">
+            <Suspense fallback={<Loader text="Loading menu..." />}>
+              <UniLinkSidebar />
+            </Suspense>
+          </div>
 
-        {/* CENTER CONTENT */}
-        <div
-          className="
-            w-full
-            max-w-[800px]
-            px-4 sm:px-6
-            text-white
-            mt-7
-            md:ml-[260px]
-            lg:mr-[260px]
-          "
-        >
-          <Suspense fallback={<Loader text="Preparing post box..." />}>
-            <div className="mb-6">
-              <Postuplode />
+          {/* RIGHT SIDEBAR — DESKTOP */}
+          <div className="hidden lg:block fixed top-24 right-4 lg:right-6 z-30">
+            <Suspense fallback={null}>
+              <RightNavbar />
+            </Suspense>
+          </div>
+
+          {/* CENTER FEED */}
+          <div
+            className="
+              w-full
+              max-w-[720px]
+              px-3 sm:px-4
+              md:ml-[260px]
+              lg:mr-[300px]
+            "
+          >
+            <div className="mb-4 sm:mb-5">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-wide">
+                Uni<span className="text-gray-500 font-normal">Link</span>
+              </h1>
+              <p className="text-sm text-gray-500">
+                Connect with students from your college
+              </p>
             </div>
-          </Suspense>
+            {/* POST UPLOAD */}
+            <Suspense fallback={<Loader text="Preparing post box..." />}>
+              <div className="mb-5 sm:mb-6">
+                <Postuplode />
+              </div>
+            </Suspense>
 
-          <Suspense fallback={<Loader text="Loading feed..." />}>
-            <Feed />
-          </Suspense>
+            {/* FEED */}
+            <Suspense fallback={<Loader text="Loading feed..." />}>
+              <Feed />
+            </Suspense>
+          </div>
+
         </div>
       </div>
     </>

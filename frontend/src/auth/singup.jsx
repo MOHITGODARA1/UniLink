@@ -3,24 +3,26 @@ import { useState } from "react";
 import Axios from "axios";
 
 function SignUp() {
-  const [UserName, SetUsername] = useState("");
-  const [Email, SetEmail] = useState("");
-  const [Collage, setCollage] = useState("");
+  const [UserName, setUserName] = useState("");
+  const [Email, setEmail] = useState("");
+  const [College, setCollege] = useState("");
   const [Password, setPassword] = useState("");
   const [ConfirmPassword, setConfirmPassword] = useState("");
   const [Agree, setAgree] = useState(false);
   const [Errors, setErrors] = useState({});
   const [Suggestions, setSuggestions] = useState([]);
+  const [Loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
-  // 🔍 SEARCH UNIVERSITY
   const searchCollege = async (value) => {
-    setCollage(value);
+    setCollege(value);
     if (value.length < 2) {
       setSuggestions([]);
       return;
     }
+
     try {
       const res = await Axios.get(
         `${import.meta.env.VITE_API}/Search?query=${value}`
@@ -31,251 +33,271 @@ function SignUp() {
     }
   };
 
-  // 🧾 REGISTER
   const registerUser = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
-    if (!UserName.trim()) newErrors.UserName = "Username is required!";
-    if (!Email.trim()) newErrors.Email = "Email is required!";
-    if (!Collage.trim()) newErrors.Collage = "University is required!";
-    if (!Password.trim()) newErrors.Password = "Password is required!";
-    if (!ConfirmPassword.trim())
-      newErrors.ConfirmPassword = "Confirm Password is required!";
+    if (!UserName.trim()) newErrors.UserName = "Username is required";
+    if (!Email.trim()) newErrors.Email = "Email is required";
+    if (!College.trim()) newErrors.College = "University is required";
+    if (Password.length < 8)
+      newErrors.Password = "Password must be at least 8 characters";
     if (Password !== ConfirmPassword)
-      newErrors.ConfirmPassword = "Passwords do not match!";
-    if (!Agree) newErrors.Agree = "You must accept Terms & Services.";
+      newErrors.ConfirmPassword = "Passwords do not match";
+    if (!Agree) newErrors.Agree = "You must accept the terms";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    setErrors({});
-
     try {
+      setLoading(true);
+      setErrors({});
+
       await Axios.post(`${import.meta.env.VITE_API}/user-Register`, {
         UserName,
         Email,
-        Collage,
+        Collage: College,
         Password,
       });
+
       navigate("/Skill-Select");
     } catch (error) {
       setErrors({
-        general: error.response?.data?.message || "Something went wrong",
+        server: error.response?.data?.message || "Registration failed",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
+  const isFormValid =
+    UserName && Email && College && Password && ConfirmPassword && Agree;
+
   return (
-    <div className="w-full min-h-screen bg-black flex justify-center items-center px-4">
+    <div className="w-full min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden border border-gray-200">
 
-      {/* BACK */}
-      <Link
-        to="/"
-        className="absolute top-5 left-5 text-gray-400 hover:text-white flex items-center gap-2 text-sm"
-      >
-        <i className="ri-arrow-left-line"></i> Home
-      </Link>
-
-      {/* MAIN CARD */}
-      <div
-        className="
-          w-full max-w-5xl
-          bg-white/10 backdrop-blur-xl
-          border border-white/20
-          rounded-3xl shadow-xl
-          grid grid-cols-1 md:grid-cols-[40%_60%]
-          overflow-hidden
-        "
-      >
-        {/* LEFT — DESKTOP ONLY */}
-        <div className="hidden md:flex flex-col justify-center items-center text-center p-10 bg-white/5 border-r border-gray-700">
-          <img src="./logo.png" alt="logo" className="h-28 mb-6" />
-          <h1 className="text-4xl font-bold bg-linear-to-b from-white to-gray-400 text-transparent bg-clip-text">
-            Join Unilink
+        {/* LEFT */}
+        <div className="hidden md:flex flex-col justify-center px-14 bg-gray-100 border-r border-gray-200">
+          <h1 className="text-4xl font-semibold text-gray-900 leading-tight">
+            Join your <br />
+            university <br />
+            network.
           </h1>
-          <p className="text-gray-300 text-lg mt-4 px-4">
-            Create your account and connect with students worldwide.
+          <p className="mt-6 text-gray-600 text-base leading-relaxed">
+            UniLink helps students connect, collaborate,
+            and grow within verified university communities.
           </p>
         </div>
 
-        {/* RIGHT — FORM */}
-        <form
-          onSubmit={registerUser}
-          className="flex flex-col justify-center p-6 sm:p-10"
-        >
-          {/* MOBILE LOGO */}
-          <img src="./logo.png" alt="logo" className="h-12 mx-auto mb-6 md:hidden" />
-
-          <h2 className="text-2xl sm:text-3xl font-semibold text-white mb-6 text-center md:text-left">
-            Create Account
+        {/* RIGHT */}
+        <div className="flex flex-col justify-center px-6 sm:px-12 py-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            Create your account
           </h2>
+          <p className="text-sm text-gray-500 mb-8">
+            It takes less than a minute.
+          </p>
 
-          {Errors.general && (
-            <p className="text-red-500 text-sm mb-3">{Errors.general}</p>
-          )}
-
-          {/* INPUT STYLE */}
-          {[
-            {
-              label: "Username",
-              value: UserName,
-              setter: SetUsername,
-              error: Errors.UserName,
-              placeholder: "Enter username",
-            },
-            {
-              label: "Email",
-              value: Email,
-              setter: SetEmail,
-              error: Errors.Email,
-              placeholder: "Enter email",
-            },
-          ].map((field, i) => (
-            <div key={i} className="mb-4">
-              <label className="text-gray-200 text-sm font-medium">
-                {field.label}
-              </label>
+          <form onSubmit={registerUser} className="space-y-4">
+            {/* USERNAME */}
+            <div>
               <input
-                type="text"
-                value={field.value}
-                onChange={(e) => field.setter(e.target.value)}
-                placeholder={field.placeholder}
+                placeholder="Username"
+                value={UserName}
+                onChange={(e) => setUserName(e.target.value)}
                 className="
-                  w-full mt-2 px-4 py-4 text-base
-                  bg-black/40 border border-gray-600
-                  rounded-xl text-white
+                  w-full px-4 py-3 rounded-lg
+                  bg-gray-50
+                  border border-gray-300
+                  text-gray-800
                   placeholder-gray-400
-                  outline-none focus:outline-none
-                  focus:border-blue-500 focus:bg-black/60
-                  transition
+                  text-sm outline-none
+                  focus:border-blue-600
                 "
               />
-              {field.error && (
-                <p className="text-red-500 text-sm mt-1">{field.error}</p>
+              {Errors.UserName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {Errors.UserName}
+                </p>
               )}
             </div>
-          ))}
 
-          {/* UNIVERSITY */}
-          <div className="mb-4 relative">
-            <label className="text-gray-200 text-sm font-medium">
-              University
-            </label>
-            <input
-              type="text"
-              value={Collage}
-              onChange={(e) => searchCollege(e.target.value)}
-              placeholder="Search university"
-              className="
-                w-full mt-2 px-4 py-4 text-base
-                bg-black/40 border border-gray-600
-                rounded-xl text-white
-                placeholder-gray-400
-                outline-none focus:outline-none
-                focus:border-blue-500 focus:bg-black/60
-                transition
-              "
-            />
-            {Suggestions.length > 0 && (
-              <ul className="absolute z-50 w-full bg-white text-black rounded-xl shadow-lg mt-1 max-h-52 overflow-y-auto">
-                {Suggestions.map((u, i) => (
-                  <li
-                    key={i}
-                    onClick={() => {
-                      setCollage(u.name);
-                      setSuggestions([]);
-                    }}
-                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                  >
-                    <p className="font-semibold">{u.name}</p>
-                    <p className="text-xs text-gray-600">
-                      {u.city}, {u.state}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {Errors.Collage && (
-              <p className="text-red-500 text-sm mt-1">{Errors.Collage}</p>
-            )}
-          </div>
+            {/* EMAIL */}
+            <div>
+              <input
+                placeholder="University email"
+                value={Email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="
+                  w-full px-4 py-3 rounded-lg
+                  bg-gray-50
+                  border border-gray-300
+                  text-gray-800
+                  placeholder-gray-400
+                  text-sm outline-none
+                  focus:border-blue-600
+                "
+              />
+              {Errors.Email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {Errors.Email}
+                </p>
+              )}
+            </div>
 
-          {/* PASSWORDS */}
-          {[{
-            label: "Password",
-            value: Password,
-            setter: setPassword,
-            error: Errors.Password,
-            placeholder: "Create password",
-          },
-          {
-            label: "Confirm Password",
-            value: ConfirmPassword,
-            setter: setConfirmPassword,
-            error: Errors.ConfirmPassword,
-            placeholder: "Confirm password",
-          }].map((field, i) => (
-            <div key={i} className="mb-4">
-              <label className="text-gray-200 text-sm font-medium">
-                {field.label}
-              </label>
+            {/* UNIVERSITY */}
+            <div className="relative">
+              <input
+                placeholder="University name"
+                value={College}
+                onChange={(e) => searchCollege(e.target.value)}
+                className="
+                  w-full px-4 py-3 rounded-lg
+                  bg-gray-50
+                  border border-gray-300
+                  text-gray-800
+                  placeholder-gray-400
+                  text-sm outline-none
+                  focus:border-blue-600
+                "
+              />
+
+              {Suggestions.length > 0 && (
+                <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg max-h-48 overflow-y-auto">
+                  {Suggestions.map((s, i) => (
+                    <li
+                      key={i}
+                      onClick={() => {
+                        setCollege(s.name);
+                        setSuggestions([]);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <p className="text-gray-900">{s.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {s.city}, {s.state}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {Errors.College && (
+                <p className="text-red-500 text-xs mt-1">
+                  {Errors.College}
+                </p>
+              )}
+            </div>
+
+            {/* PASSWORD */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password (min 8 characters)"
+                value={Password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="
+                  w-full px-4 py-3 rounded-lg
+                  bg-gray-50
+                  border border-gray-300
+                  text-gray-800
+                  placeholder-gray-400
+                  text-sm outline-none
+                  focus:border-blue-600
+                "
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-xs text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+              {Errors.Password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {Errors.Password}
+                </p>
+              )}
+            </div>
+
+            {/* CONFIRM */}
+            <div>
               <input
                 type="password"
-                value={field.value}
-                onChange={(e) => field.setter(e.target.value)}
-                placeholder={field.placeholder}
+                placeholder="Confirm password"
+                value={ConfirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="
-                  w-full mt-2 px-4 py-4 text-base
-                  bg-black/40 border border-gray-600
-                  rounded-xl text-white
+                  w-full px-4 py-3 rounded-lg
+                  bg-gray-50
+                  border border-gray-300
+                  text-gray-800
                   placeholder-gray-400
-                  outline-none focus:outline-none
-                  focus:border-blue-500 focus:bg-black/60
-                  transition
+                  text-sm outline-none
+                  focus:border-blue-600
                 "
               />
-              {field.error && (
-                <p className="text-red-500 text-sm mt-1">{field.error}</p>
+              {Errors.ConfirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {Errors.ConfirmPassword}
+                </p>
               )}
             </div>
-          ))}
 
-          {/* TERMS */}
-          <div className="flex items-center mt-4">
-            <input
-              type="checkbox"
-              checked={Agree}
-              onChange={(e) => setAgree(e.target.checked)}
-              className="w-5 h-5 accent-blue-500"
-            />
-            <p className="text-gray-300 text-sm ml-2">
-              I agree to the{" "}
-              <span className="text-blue-400 hover:underline cursor-pointer">
-                Terms & Services
-              </span>
-            </p>
-          </div>
-          {Errors.Agree && (
-            <p className="text-red-500 text-sm mt-1">{Errors.Agree}</p>
-          )}
+            {/* TERMS */}
+            <div className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                checked={Agree}
+                onChange={(e) => setAgree(e.target.checked)}
+                className="mt-1 accent-blue-600"
+              />
+              <p className="text-sm text-gray-500">
+                I agree to UniLink’s{" "}
+                <span className="text-blue-600 hover:underline cursor-pointer">
+                  Terms & Privacy Policy
+                </span>
+              </p>
+            </div>
 
-          {/* SUBMIT */}
-          <button
-            type="submit"
-            className="
-              w-full mt-6 py-4 text-lg
-              bg-white text-black font-semibold
-              rounded-xl
-              hover:bg-blue-500 hover:text-white
-              transition
-            "
-          >
-            Create Account
-          </button>
-        </form>
+            {Errors.Agree && (
+              <p className="text-red-500 text-xs">{Errors.Agree}</p>
+            )}
+
+            {/* SERVER ERROR */}
+            {Errors.server && (
+              <p className="text-red-500 text-sm">{Errors.server}</p>
+            )}
+
+            {/* SUBMIT */}
+            <button
+              type="submit"
+              disabled={!isFormValid || Loading}
+              className={`w-full py-3 rounded-lg font-medium transition ${
+                Loading
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+            >
+              {Loading ? "Creating account..." : "Create account"}
+            </button>
+          </form>
+
+          {/* LOGIN */}
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Already have an account?{" "}
+            <Link to="/" className="text-blue-600 hover:underline">
+              Log in
+            </Link>
+          </p>
+
+          <p className="text-center text-xs text-gray-400 mt-8">
+            © UniLink
+          </p>
+        </div>
       </div>
     </div>
   );

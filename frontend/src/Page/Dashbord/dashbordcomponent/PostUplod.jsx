@@ -14,7 +14,7 @@ function Postuplode() {
     const loadUser = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API}/dashboard`, {
-          headers: { authorization: token }
+          headers: { authorization: token },
         });
 
         setUser(res.data.user);
@@ -36,7 +36,7 @@ function Postuplode() {
       await axios.post(`${import.meta.env.VITE_API}/Uplode-Post`, {
         content,
         authorId,
-        Collage
+        Collage,
       });
 
       setContent("");
@@ -55,57 +55,116 @@ function Postuplode() {
   return (
     <>
       {/* MAIN CARD */}
-      <div className="bg-[#0d0d0d] border border-gray-800 p-5 rounded-2xl shadow-xl">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5">
         
         {/* TOP ROW */}
-        <div className="flex items-start gap-3">
+        <div className="flex gap-3 items-start">
           <img
             src={user.ProfilePic || "/Profile.photo.5.jpg"}
-            className="w-12 h-12 rounded-full border border-gray-700 object-cover"
+            alt="User"
+            className="
+              w-10 h-10 sm:w-11 sm:h-11
+              rounded-full
+              border border-gray-300
+              object-cover
+              shrink-0
+            "
           />
 
           <textarea
-            placeholder="Start a post..."
+            placeholder="Share something with your college..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full bg-black p-3 rounded-xl border border-gray-700 text-gray-300 resize-none focus:border-blue-500 outline-none"
             rows="3"
+            className="
+              w-full
+              resize-none
+              bg-gray-50
+              border border-gray-200
+              rounded-lg
+              p-3
+              text-sm
+              text-gray-800
+              placeholder-gray-400
+              focus:outline-none
+              focus:border-blue-500
+            "
           />
         </div>
 
-        <div className="border-b border-gray-800 my-4"></div>
+        {/* DIVIDER */}
+        <div className="border-t border-gray-200 my-4" />
 
         {/* BOTTOM ROW */}
-        <div className="flex justify-between items-center px-2">
-          <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          
+          {/* ACTION BUTTONS */}
+          <div className="flex flex-wrap gap-2 text-sm">
             <button
-              className="text-gray-300 hover:text-white text-sm"
               onClick={() => {
                 setMediaType("video");
                 setShowMediaCard(true);
               }}
+              className="
+                flex items-center gap-1
+                px-3 py-1.5
+                rounded-md
+                text-gray-600
+                hover:bg-gray-100
+                hover:text-gray-900
+                transition
+              "
             >
-              📹 Video
+              📹 <span>Video</span>
             </button>
 
             <button
-              className="text-gray-300 hover:text-white text-sm"
               onClick={() => {
                 setMediaType("image");
                 setShowMediaCard(true);
               }}
+              className="
+                flex items-center gap-1
+                px-3 py-1.5
+                rounded-md
+                text-gray-600
+                hover:bg-gray-100
+                hover:text-gray-900
+                transition
+              "
             >
-              🖼 Photo
+              🖼 <span>Photo</span>
             </button>
 
-            <button className="text-gray-300 hover:text-white text-sm">
-              📝 Article
+            <button
+              className="
+                flex items-center gap-1
+                px-3 py-1.5
+                rounded-md
+                text-gray-600
+                hover:bg-gray-100
+                hover:text-gray-900
+                transition
+              "
+            >
+              📝 <span>Article</span>
             </button>
           </div>
 
+          {/* POST BUTTON */}
           <button
             onClick={handleUpload}
-            className="bg-blue-600 px-4 py-2 rounded-xl hover:bg-blue-500 text-sm text-white"
+            className="
+              w-full sm:w-auto
+              bg-blue-600
+              text-white
+              text-sm
+              font-medium
+              px-6 py-2
+              rounded-lg
+              hover:bg-blue-700
+              transition
+            "
           >
             Post
           </button>
