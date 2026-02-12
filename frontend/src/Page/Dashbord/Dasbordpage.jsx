@@ -87,14 +87,14 @@ function DasbordPage() {
             className="
               w-full
               max-w-[720px]
-              px-3 sm:px-4
+              px-1 sm:px-4
               md:ml-[260px]
               lg:mr-[300px]
             "
           >
             <div className="mb-4 sm:mb-5">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-wide">
-                Uni<span className="text-gray-500 font-normal">Link</span>
+              <h1 className="text-2xl sm:text-2xl font-bold text-gray-900 tracking-wide">
+                Uni<span className="text-blue-600 font-normal">Link</span>
               </h1>
               <p className="text-sm text-gray-500">
                 Connect with students from your college
@@ -102,7 +102,7 @@ function DasbordPage() {
             </div>
             {/* POST UPLOAD */}
             <Suspense fallback={<Loader text="Preparing post box..." />}>
-              <div className="mb-5 sm:mb-6">
+              <div className="mb-2 sm:mb-6">
                 <Postuplode />
               </div>
             </Suspense>
