@@ -24,7 +24,8 @@ function Profile() {
   const [openComments, setOpenComments] = useState({});
   const [commentText, setCommentText] = useState({});
 
-  const token = localStorage.getItem("Token");
+const storedUser = JSON.parse(localStorage.getItem("Userdata"));
+const userId = storedUser?._id;
 
   const allSkills = [
     "JavaScript","React.js","Node.js","Express.js","MongoDB","HTML","CSS","Tailwind CSS",
@@ -50,9 +51,9 @@ function Profile() {
     const loadUser = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${import.meta.env.VITE_API}/dashboard`, {
-          headers: { authorization: token },
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_API}/dashboard?userId=${userId}`
+        );
 
         setUser(res.data.user);
         setSelectedSkills(res.data.user.Skill || []);
@@ -79,7 +80,7 @@ function Profile() {
   }
 
   if (!user) return null;
-
+ 
   return (
     <div className="min-h-screen bg-gray-50">
       <UpperNavbar />

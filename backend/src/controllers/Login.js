@@ -23,6 +23,7 @@ const LoginCheck = async (req, res) => {
         success: false
       });
     }
+    console.log(user);
 
     const PasswordCheck = await bcrypt.compare(Password, user.Password);
 

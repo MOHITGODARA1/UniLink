@@ -38,6 +38,7 @@ function Login() {
       );
 
       localStorage.setItem("Userdata", JSON.stringify(response.data.user));
+      
       navigate("/dashboard");
     } catch (error) {
       setErrors({

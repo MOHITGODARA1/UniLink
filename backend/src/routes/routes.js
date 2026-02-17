@@ -28,7 +28,7 @@ router.post("/user-Register", RegisterUser);
 router.post("/Login", LoginCheck);
 
 // Dashboard
-router.get("/dashboard", AuthJwt, Dashbordcheck);
+router.get("/dashboard", Dashbordcheck);
 
 // Search colleges
 router.get("/Search", Search);

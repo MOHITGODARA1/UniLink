@@ -233,7 +233,7 @@ function RightNavbar() {
       )}
 
       {/* Custom scrollbar styling */}
-      <style jsx>{`
+      <style>{`
         div::-webkit-scrollbar {
           width: 6px;
         }

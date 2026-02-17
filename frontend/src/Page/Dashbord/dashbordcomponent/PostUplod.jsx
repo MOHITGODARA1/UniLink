@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import MediaUploadCard from "../../../components/Layout/MediaUploadCard";
 
+const storedUser = JSON.parse(localStorage.getItem("Userdata"));
+const userId = storedUser?._id;
 function Postuplode() {
   const [content, setContent] = useState("");
   const [user, setUser] = useState(null);
@@ -15,9 +17,7 @@ function Postuplode() {
 
     const loadUser = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API}/dashboard`, {
-          headers: { authorization: token },
-        });
+        const res = await axios.get(`${import.meta.env.VITE_API}/dashboard?userId=${userId}`);
 
         setUser(res.data.user);
       } catch (err) {
@@ -221,7 +221,7 @@ function Postuplode() {
         />
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes slide-down {
           from {
             transform: translate(-50%, -100%);

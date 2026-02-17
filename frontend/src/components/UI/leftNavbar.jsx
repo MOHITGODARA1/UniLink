@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const storedUser = JSON.parse(localStorage.getItem("Userdata"));
+const userId = storedUser?._id;
 function UniLinkSidebar() {
   const [user, setUser] = useState(null);
 
@@ -9,10 +11,7 @@ function UniLinkSidebar() {
 
     const loadUser = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API}/dashboard`,
-          { headers: { authorization: token } }
-        );
+        const res = await axios.get(`${import.meta.env.VITE_API}/dashboard?userId=${userId}`);
 
         const u = res.data.user;
 
