@@ -18,30 +18,26 @@ export const options = {
   },
 };
 
-const BASE_URL = "http://localhost:5002";
+const BASE_URL = "https://unilink-production-a1c4.up.railway.app";
 
 export default function () {
-  // unique user data (avoid duplicate conflicts)
   const uniqueId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
   group("Signup API Test", () => {
-    const payload = JSON.stringify({
-      UserName: `user_${uniqueId}`,
-      Email: `user_${uniqueId}@gmail.com`,
-      College: "LPU",
-      Password: "SecurePass123!",
-    });
+    const LOGIN_PAYLOAD = JSON.stringify({
+        Name: "user_12345",        
+        Password: "SecurePass123!"
+      });
 
     const res = http.post(
-      `${BASE_URL}/api/user/v1/user-Register`,
-      payload,
+      `${BASE_URL}/api/user/v1/Login`,
+      LOGIN_PAYLOAD,
       {
         headers: { "Content-Type": "application/json" },
         timeout: "5s",
       }
     );
 
-    // optimized checks (no repeated JSON.parse)
     check(res, {
       "status is 201 or 409": (r) => r.status === 201 || r.status === 409,
       "no server error (not 500)": (r) => r.status !== 500,
@@ -61,8 +57,6 @@ export default function () {
 
     sleep(0.1);
   });
-
-  // lightweight endpoint (important for realistic testing)
   group("Health Check API", () => {
     const res = http.get(`${BASE_URL}/health`);
 

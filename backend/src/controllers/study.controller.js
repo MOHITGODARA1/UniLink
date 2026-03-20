@@ -1,7 +1,7 @@
 import StudyModel from "../model/Study.model.js";
 import cloudinary from "../utils/cloudnary.js";
 
-// UPLOAD PDF
+
 export const uploadPdf = async (req, res) => {
   try {
     const { title, uploadedBy } = req.body;
@@ -10,7 +10,7 @@ export const uploadPdf = async (req, res) => {
       return res.status(400).json({ message: "PDF file is required" });
     }
 
-    // Cloudinary Upload
+  
     const pdfUpload = await cloudinary.uploader.upload(req.file.path, {
       resource_type: "raw",
       folder: "unilink_pdfs",
@@ -33,7 +33,7 @@ export const uploadPdf = async (req, res) => {
   }
 };
 
-// GET ALL PDFs
+
 export const getAllPdfs = async (req, res) => {
   try {
     const pdfs = await StudyModel.find().sort({ uploadedAt: -1 });
@@ -43,7 +43,7 @@ export const getAllPdfs = async (req, res) => {
   }
 };
 
-// GET SINGLE PDF
+
 export const getPdf = async (req, res) => {
   try {
     const pdf = await StudyModel.findById(req.params.id);
@@ -55,7 +55,7 @@ export const getPdf = async (req, res) => {
   }
 };
 
-// DELETE PDF
+
 export const deletePdf = async (req, res) => {
   try {
     const pdf = await StudyModel.findById(req.params.id);

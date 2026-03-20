@@ -26,27 +26,20 @@ import { asyncHandler } from "../middlewares/errorHandler.js";
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-// ✅ OPTIMIZED SIGNUP ENDPOINT
-// - Input validation
-// - Rate limiting (prevent spam)
-// - In-memory caching
-// - Async error handling
+
 router.post(
   "/user-Register",
   validateSignupInput,
   asyncHandler(RegisterUser)
 );
 
-// ✅ LOGIN
+
 router.post("/Login", LoginCheck);
 
-// Dashboard
 router.get("/dashboard", Dashbordcheck);
 
-// Search colleges
 router.get("/Search", Search);
 
-// Skill Set Update
 router.post("/Skill-Set", async (req, res) => {
   try {
     const { UserName, Skill } = req.body;

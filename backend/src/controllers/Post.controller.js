@@ -12,9 +12,6 @@ const UploadPost = async (req, res) => {
       });
     }
 
-    // ********************************************
-    // CASE 1 → NO MEDIA (TEXT-ONLY POST)
-    // ********************************************
     if (!req.file) {
       if (!content) {
         return res.status(400).json({
@@ -36,20 +33,17 @@ const UploadPost = async (req, res) => {
       });
     }
 
-    // ********************************************
-    // CASE 2 → MEDIA POST (IMAGE OR VIDEO)
-    // ********************************************
 
-    // Upload media to Cloudinary
+ 
     const uploadResult = await cloudinary.uploader.upload(req.file.path, {
       folder: "unilink_posts",
       resource_type: mediaType === "video" ? "video" : "image",
     });
 
-    // Delete temporary file
+  
     fs.unlink(req.file.path, () => {});
 
-    // Save post with media
+
     await postModel.create({
       content: content || "",
       authorId,

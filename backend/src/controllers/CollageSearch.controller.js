@@ -7,15 +7,15 @@ const __dirname = path.dirname(__filename);
 
 const filePath = path.join(__dirname, "../data/Collage.json");
 
-// Load full objects
+
 let Colleges = [];
 
 try {
   const data = fs.readFileSync(filePath, "utf8");
   Colleges = JSON.parse(data);
-  console.log(`✅ Loaded colleges: ${Colleges.length}`);
+  console.log(` Loaded colleges: ${Colleges.length}`);
 } catch (err) {
-  console.error("❌ Failed to load Collage.json:", err.message);
+  console.error("Failed to load Collage.json:", err.message);
 }
 
 const Search = (req, res) => {
@@ -34,7 +34,7 @@ const Search = (req, res) => {
     return res.json(result);
 
   } catch (error) {
-    console.error("❌ Search error:", error.message);
+    console.error("Failed to search colleges:", error.message);
     return res.status(500).json({
       message: "Search failed",
       error: error.message

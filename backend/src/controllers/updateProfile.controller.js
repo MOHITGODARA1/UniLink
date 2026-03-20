@@ -12,7 +12,7 @@ const UpdateProfile = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Validate username uniqueness
+   
     if (UserName && UserName !== user.UserName) {
       const exists = await User.findOne({ UserName });
       if (exists) {
@@ -21,7 +21,7 @@ const UpdateProfile = async (req, res) => {
       user.UserName = UserName;
     }
 
-    // Validate email uniqueness
+   
     if (Email && Email !== user.Email) {
       const exists = await User.findOne({ Email });
       if (exists) {
@@ -30,12 +30,12 @@ const UpdateProfile = async (req, res) => {
       user.Email = Email;
     }
 
-    // Update Bio
+   
     if (Bio !== undefined) {
       user.Bio = Bio;
     }
 
-    // Password change validation
+   
     if ((OldPassword && !NewPassword) || (!OldPassword && NewPassword)) {
       return res.status(400).json({
         message: "Both old and new password required to update password",

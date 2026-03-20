@@ -14,29 +14,23 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ⚡ PERFORMANCE MIDDLEWARE CHAIN (in correct order)
 
-// 1. Request logging middleware (must be first to capture all requests)
 app.use(requestLogger);
 
-// 2. Compression middleware (gzip all responses - 60-80% size reduction)
+
 app.use(compression({
-  level: 6, // Balance between compression and speed
-  threshold: 1024, // Only compress responses > 1KB
+  level: 6,
+  threshold: 1024, 
   type: ["application/json", "text/html", "text/plain", "text/css", "application/javascript"],
 }));
 
-// 3. Body parsing middleware with size limits
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ limit: "10kb", extended: true }));
 
-// 4. Performance monitoring (tracks response times)
 app.use(performanceMonitor);
 
-// Static files
 app.use(express.static(path.join(__dirname, "../public")));
 
-// CORS configuration
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://unilink-1.onrender.com"],
@@ -46,22 +40,17 @@ app.use(
   })
 );
 
-// ⚡ CACHE STATISTICS ENDPOINT
 app.use(cacheStatsMiddleware);
 
-// Routes
 app.use("/api/user/v1", router);
 
-// ⚡ ENHANCED HEALTH CHECK with metrics
 app.get("/health", healthCheckWithMetrics);
 
-// ⚡ METRICS ENDPOINT (for monitoring)
 app.get("/metrics", (req, res) => {
   const { getMetrics } = require("./middlewares/performanceMonitor.js");
   res.json(getMetrics());
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -70,7 +59,6 @@ app.use((req, res) => {
   });
 });
 
-// Error handling middleware (must be last)
 app.use(errorHandler);
 
 export default app;

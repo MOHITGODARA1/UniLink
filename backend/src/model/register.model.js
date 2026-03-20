@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 30,
       sparse: true,
-      index: true, // Create index for faster queries
+      index: true,
     },
 
     Email: {
@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       sparse: true,
-      index: true, // Create index for faster queries
+      index: true, 
       validate: {
         validator: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
         message: "Invalid email format",

@@ -11,10 +11,10 @@ const RegisterUser = async (req, res) => {
 
     logger.debug(`[${requestId}] Signup request`, { Email });
 
-    // ⚡ Hash password (keep low cost for performance)
+  
     const hashedPassword = await bcrypt.hash(Password, 6);
 
-    // ⚡ DIRECT INSERT (NO PRE-CHECK QUERY)
+    
     const newUser = await User.create({
       UserName,
       Email,
@@ -39,7 +39,7 @@ const RegisterUser = async (req, res) => {
     });
 
   } catch (error) {
-    // ✅ HANDLE DUPLICATE (ONLY HERE)
+ 
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
 

@@ -17,9 +17,9 @@ export const toggleLike = async (req, res) => {
     const isLiked = post.likes.some(id => id.toString() === userId);
 
     if (isLiked) {
-      post.likes.pull(userId);  // remove like
+      post.likes.pull(userId);  
     } else {
-      post.likes.push(userId);  // add like
+      post.likes.push(userId);  
     }
 
     await post.save();

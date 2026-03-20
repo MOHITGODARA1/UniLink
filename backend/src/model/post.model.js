@@ -47,7 +47,7 @@ const PostSchema = new mongoose.Schema(
       default: "none"
     },
 
-    // ⭐ NEW LIKE SYSTEM
+
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -55,7 +55,7 @@ const PostSchema = new mongoose.Schema(
       }
     ],
 
-    // ⭐ NEW COMMENT SYSTEM
+  
     comments: [commentSchema]
   },
   { timestamps: true }

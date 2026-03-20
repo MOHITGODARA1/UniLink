@@ -1,6 +1,4 @@
-/**
- * Structured logging utility for better debugging under load
- */
+
 
 const log = (level, message, data = {}) => {
   const timestamp = new Date().toISOString();

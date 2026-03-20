@@ -6,31 +6,31 @@ const LoginCheck = async (req, res) => {
   try {
     const { Name, Password } = req.body;
 
+    
     if (!Name || !Password) {
       return res.status(400).json({
-        message: "Email and Password are required",
-        success: false
+        success: false,
+        message: "Username/Email and Password are required"
       });
     }
 
     const user = await User.findOne({
       $or: [{ UserName: Name }, { Email: Name }]
-    });
+    }).select("+Password"); 
 
     if (!user) {
       return res.status(404).json({
-        message: "User is not registered",
-        success: false
+        success: false,
+        message: "User not found"
       });
     }
-    console.log(user);
 
-    const PasswordCheck = await bcrypt.compare(Password, user.Password);
+    const isMatch = await bcrypt.compare(Password, user.Password);
 
-    if (!PasswordCheck) {
+    if (!isMatch) {
       return res.status(401).json({
-        message: "Password is incorrect",
-        success: false
+        success: false,
+        message: "Invalid credentials"
       });
     }
 
@@ -40,20 +40,26 @@ const LoginCheck = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    const userData = {
+      _id: user._id,
+      UserName: user.UserName,
+      Email: user.Email,
+      College: user.Collage
+    };
+
     return res.status(200).json({
+      success: true,
       message: "Login successful",
-      user: user,  // Changed from 'data' to 'user' to match frontend
       token,
-      success: true
+      user: userData
     });
 
   } catch (error) {
-    console.error("LoginCheck Error:", error.message);
+    console.error("Login Error:", error);
 
     return res.status(500).json({
-      message: "Server error",
       success: false,
-      error: error.message
+      message: "Internal server error"
     });
   }
 };
