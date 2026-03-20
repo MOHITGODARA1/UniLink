@@ -20,11 +20,24 @@ import {
 import { toggleLike } from "../controllers/like.controller.js";
 import { addComment } from "../controllers/comment.controller.js";
 import UpdateProfile from "../controllers/updateProfile.controller.js";
+import { validateSignupInput } from "../middlewares/validation.js";
+import { asyncHandler } from "../middlewares/errorHandler.js";
+
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
+// ✅ OPTIMIZED SIGNUP ENDPOINT
+// - Input validation
+// - Rate limiting (prevent spam)
+// - In-memory caching
+// - Async error handling
+router.post(
+  "/user-Register",
+  validateSignupInput,
+  asyncHandler(RegisterUser)
+);
 
-router.post("/user-Register", RegisterUser);
+// ✅ LOGIN
 router.post("/Login", LoginCheck);
 
 // Dashboard

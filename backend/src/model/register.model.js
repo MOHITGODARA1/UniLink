@@ -7,6 +7,11 @@ const UserSchema = new mongoose.Schema(
       required: true,
       trim: true,
       unique: true,
+      lowercase: true,
+      minlength: 3,
+      maxlength: 30,
+      sparse: true,
+      index: true, // Create index for faster queries
     },
 
     Email: {
@@ -14,6 +19,13 @@ const UserSchema = new mongoose.Schema(
       required: true,
       trim: true,
       unique: true,
+      lowercase: true,
+      sparse: true,
+      index: true, // Create index for faster queries
+      validate: {
+        validator: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+        message: "Invalid email format",
+      },
     },
 
     Collage: {
